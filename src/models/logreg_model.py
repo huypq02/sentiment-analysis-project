@@ -1,14 +1,29 @@
+from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix, accuracy_score
 from model_interface import SentimentModel
 
 class LogisticRegressionModel(SentimentModel):
-    def train(self):
+    def __init__(self):
+        self.classifier = LogisticRegression() # Define the Logistic Regression Classifier
+        self.scaler = StandardScaler()
+
+    def train(self, data, labels):
         """Train Logistic Regression model"""
+        return self.classifier.fit(data, labels)
+        
+    def scale_feature(self, data, test_data):
+        """Feature scaling the provided features."""
+        data = self.scaler.fit_transform(data)
+        test_data = self.scaler.transform(test_data)
+        return data, test_data
 
-    def predict(self):
+    def predict(self, data):
         """Make predictions"""
-        pass
+        return self.classifier.predict(data)
 
-    def evaluate(self):
+    def evaluate(self, test_data, test_labels):
         """Evaluate Logistic Regression model"""
-        pass
+        cm = confusion_matrix(test_labels, self.classifier.predict(test_data))  # Confusion matrix
+        score = accuracy_score(test_labels, self.classifier.predict(test_data)) # Accuracy score
+        return cm, score
