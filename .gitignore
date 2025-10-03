@@ -15,10 +15,11 @@ dist/
 notebooks/.ipynb_checkpoints/
 
 # Model files
-/models/
+/models/*
 
 # Data
-/data/
+/data/processed/*
+/data/raw/*
 
 # Logs
 *.log

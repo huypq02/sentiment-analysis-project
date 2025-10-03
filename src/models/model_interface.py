@@ -2,16 +2,21 @@ from abc import ABC, abstractmethod
 
 class SentimentModel(ABC):
     @abstractmethod
-    def train(self):
-        """Train the model"""
+    def train(self, data, labels):
+        """Train the model using the provided data and labels."""
+        pass        
+
+    @abstractmethod
+    def scale_feature(self, data, test_data):
+        """Feature scaling the provided features."""
         pass
 
     @abstractmethod
-    def predict(self):
-        """Make predictions"""
+    def predict(self, data):
+        """Make predictions on the provided data."""
         pass
 
     @abstractmethod
-    def evaluate(self):
-        """Evaluate the model"""
+    def evaluate(self, test_data, test_labels):
+        """Evaluate the model using the provided test data and test labels."""
         pass
