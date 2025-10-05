@@ -12,7 +12,7 @@ class SentimentModel(ABC):
         pass
 
     @abstractmethod
-    def predict(self, data):
+    def predict(self, test_data):
         """Make predictions on the provided data."""
         pass
 

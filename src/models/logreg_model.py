@@ -5,8 +5,9 @@ from .model_interface import SentimentModel
 
 class LogisticRegressionModel(SentimentModel):
     def __init__(self):
-        self.classifier = LogisticRegression(random_state=0) # Define the Logistic Regression Classifier
-        self.scaler = StandardScaler()                       # Define the Standard Scaler
+        """Initialize the Logistic Regression and Standard scaler."""
+        self.classifier = LogisticRegression(random_state=0)
+        self.scaler = StandardScaler()
 
     def train(self, data, labels):
         """Train Logistic Regression model"""
@@ -18,9 +19,9 @@ class LogisticRegressionModel(SentimentModel):
         test_data = self.scaler.transform(test_data)
         return data, test_data
 
-    def predict(self, data):
+    def predict(self, test_data):
         """Make predictions"""
-        return self.classifier.predict(data)
+        return self.classifier.predict(test_data)
 
     def evaluate(self, test_data, test_labels):
         """Evaluate Logistic Regression model"""
