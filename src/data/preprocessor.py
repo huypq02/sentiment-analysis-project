@@ -14,12 +14,12 @@ class Preprocessor():
         # Lowercase and Punctual Removal
         text = re.sub("[^\w\s\-]", " ", text).lower()
 
-        # Stop word removal
+        # Define English Stop word
         en_stopwords = stopwords.words('english')
 
-        # Both English and Vietnamese Tokenization
+        # Tokenization
         tokens = word_tokenize(text)
 
-        # Remove both English and Vietnamese stopwords
-        tokens = [token for token in tokens if token not in en_stopwords and token not in vi_stopwords]
+        # Remove the English topwords
+        tokens = [token for token in tokens if token not in en_stopwords]
         return tokens
