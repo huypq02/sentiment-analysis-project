@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class BaseFeatureExtractor():
+class BaseFeatureExtractor(ABC):
     """Abstract base class for feature extraction strategies."""
 
     @abstractmethod
@@ -15,4 +15,5 @@ class BaseFeatureExtractor():
 
     def fit_transform(self, sentences):
         """Fit the extractor and transform text into numerical representations."""
-        pass
+        self.fit(sentences)
+        return self.transform(sentences)

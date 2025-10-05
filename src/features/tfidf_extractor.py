@@ -1,5 +1,5 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
-from base_feature_extractor import BaseFeatureExtractor
+from .base_feature_extractor import BaseFeatureExtractor
 
 class TFIDFExtractor(BaseFeatureExtractor):
     def __init__(self):
