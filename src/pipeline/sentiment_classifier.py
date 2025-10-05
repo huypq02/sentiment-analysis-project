@@ -15,5 +15,6 @@ class SentimentClassifier:
 
     def classify(self, text):
         """Classify the provided data."""
-        text = Preprocessor.preprocess(self, text)
+        preprocessor = Preprocessor()
+        text = preprocessor.preprocess(self, text)
         return self.model.predict(text)
