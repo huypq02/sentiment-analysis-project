@@ -11,7 +11,7 @@ class LogisticRegressionModel(SentimentModel):
 
     def train(self, data, labels):
         """Train Logistic Regression model"""
-        return self.classifier.fit(data, labels)
+        self.classifier.fit(data, labels)
         
     def scale_feature(self, data, test_data):
         """Feature scaling the provided features."""

@@ -11,11 +11,13 @@ class NaiveBayesModel(SentimentModel):
 
     def train(self, data, labels):
         """Train the provided data on the Naive Bayes model."""
-        return self.classifier.fit(data, labels)
+        self.classifier.fit(data, labels)
     
     def scale_feature(self, data, test_data):
-        """Feature scaling the provided data."""
-        return self.scaler(data, test_data)
+        """Feature scaling the provided features."""
+        data = self.scaler.fit_transform(data)
+        test_data = self.scaler.transform(test_data)
+        return data, test_data
     
     def predict(self, test_data):
         """Make a prediction."""
