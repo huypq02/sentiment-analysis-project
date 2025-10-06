@@ -14,7 +14,9 @@ class LogisticRegressionModel(SentimentModel):
         self.classifier.fit(data, labels)
         
     def scale_feature(self, data, test_data):
-        """Feature scaling the provided features."""
+        """Feature scaling the provided features.
+        This method does NOT modify the input arrays in-place.
+        Returns scaled copies of the input data and test_data."""
         data = self.scaler.fit_transform(data)
         test_data = self.scaler.transform(test_data)
         return data, test_data
