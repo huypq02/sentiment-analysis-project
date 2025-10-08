@@ -29,5 +29,5 @@ class NaiveBayesModel(SentimentModel):
         """Evaluate Naive Bayes model"""
         y_pred = self.classifier.predict(test_data)
         cm = confusion_matrix(test_labels, y_pred)  # Confusion matrix
-        score = accuracy_score(test_labels, y_pred) # Accuracy score
-        return cm, score
+        accuracy = accuracy_score(test_labels, y_pred) # Accuracy score
+        return cm, accuracy
