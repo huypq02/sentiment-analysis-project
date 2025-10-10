@@ -45,10 +45,10 @@ class TestNaiveBayesModel(unittest.TestCase):
         self.model = NaiveBayesModel()
         # Dummy data: 4 samples, 
         # including 2 features (X_train, X_test) and 2 targets (y_train, y_test)
-        self.X_train = np.array([[1, 2], [2, 1], [1, 0], [0, 1]])
+        self.X_train = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
         self.y_train = np.array([0, 1, 0, 1])
-        self.X_test = np.array([[1, 1], [0, 0]])
-        self.y_test = np.array([0, 1])
+        self.X_test = np.array([[4, 4], [5, 5]])
+        self.y_test = np.array([1, 0])
 
     def test_train(self):
         """Unit test for training Naive Bayes model."""
