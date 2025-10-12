@@ -4,9 +4,19 @@ from src.data.data_loader import DataLoader
 from src.data.preprocessor import Preprocessor
 
 def load_config(path):
-    """Load config safely."""
-    with open(path, 'r') as f:
-        return yaml.safe_load(f)
+    """Load config safely with error handling."""
+    try:
+        with open(path, 'r') as f:
+            return yaml.safe_load(f)
+    except FileNotFoundError:
+        print(f"Error: Config file '{path}' not found.")
+        return None
+    except yaml.YAMLError as e:
+        print(f"Error: Failed to parse YAML config file '{path}': {e}")
+        return None
+    except Exception as e:
+        print(f"Error: Unexpected error loading config file '{path}': {e}")
+        return None
 
 def main():
     """The training pipeline on the model"""
@@ -39,7 +49,7 @@ def main():
                                                         test_size=0.2, random_state=0)
 
     # 5. Extractor Features
-
+    
 
 if __name__ == "__main__":
     main()
