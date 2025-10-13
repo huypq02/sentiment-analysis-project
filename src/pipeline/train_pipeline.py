@@ -3,6 +3,8 @@ import os
 from sklearn.model_selection import train_test_split
 from src.data.data_loader import DataLoader
 from src.data.preprocessor import Preprocessor
+from src.features.tfidf_extractor import TFIDFExtractor
+from src.models.logreg_model import LogisticRegressionModel
 
 def load_config(path):
     """Load config safely with error handling."""
@@ -24,8 +26,7 @@ def main():
     # 1. Load config
     config = load_config('config/config.yaml')
     if config is None:
-        print("Failed to load configuration. Exiting pipeline.")
-        return
+        exit(1)
     filename = os.path.join(config['file']['directory'], config['file']['name'])
 
     # 2. Load data
@@ -49,7 +50,14 @@ def main():
     X_train, X_test, y_train, y_test = train_test_split(texts_cleaned, labels, 
                                                         test_size=0.2, random_state=0)
 
-    # TODO: Will implement 5. Extractor Features
+    # 5. Extractor Features
+    # TODO: consider loading config of a specific feature
+    extractor = TFIDFExtractor()
+    X_train_vec = extractor.fit_transform(X_train)
+    X_test_vec = extractor.transform(X_test)
+
+    # TODO: will implement 6. Fit and transform the model
+    # TODO: consider loading config of a specific model
     
 
 if __name__ == "__main__":
