@@ -23,6 +23,9 @@ def main():
     """The training pipeline on the model"""
     # 1. Load config
     config = load_config('config/config.yaml')
+    if config is None:
+        print("Failed to load configuration. Exiting pipeline.")
+        return
     filename = os.path.join(config['file']['directory'], config['file']['name'])
 
     # 2. Load data
