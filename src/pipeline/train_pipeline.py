@@ -1,4 +1,5 @@
 import yaml
+import os
 from sklearn.model_selection import train_test_split
 from src.data.data_loader import DataLoader
 from src.data.preprocessor import Preprocessor
@@ -22,7 +23,7 @@ def main():
     """The training pipeline on the model"""
     # 1. Load config
     config = load_config('config/config.yaml')
-    filename = config['file']['path']+'/'+config['file']['name']
+    filename = os.path.join(config['file']['directory'], config['file']['name'])
 
     # 2. Load data
     # Define a DataLoader's object
@@ -33,10 +34,7 @@ def main():
     # 3. Preprocessing
     # Preprocess data
     preprocessor = Preprocessor()
-    df['reviewText_clean'] = df.apply(
-        lambda x: preprocessor.preprocess(x['reviewText']),
-        axis=1,
-    )
+    df['reviewText_clean'] = df['reviewText'].apply(preprocessor.preprocess)
     # Convert df['reviewText_clean'] from tokens to string X
     texts_cleaned = df['reviewText_clean'].apply(
         lambda x: ' '.join(x)
@@ -48,7 +46,7 @@ def main():
     X_train, X_test, y_train, y_test = train_test_split(texts_cleaned, labels, 
                                                         test_size=0.2, random_state=0)
 
-    # 5. Extractor Features
+    # TODO: Will implement 5. Extractor Features
     
 
 if __name__ == "__main__":
