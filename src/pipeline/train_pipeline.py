@@ -1,5 +1,6 @@
 import yaml
 import os
+import joblib
 from sklearn.model_selection import train_test_split
 from src.data.data_loader import DataLoader
 from src.data.preprocessor import Preprocessor
@@ -65,8 +66,19 @@ def main():
 
     # 7. Evaluation
     cm, accuracy = model.evaluate(feature_test_scaled, y_test)
-    print(cm)
-    print(accuracy)
+    print("Confusion Matrix:\n", cm)
+    print("Accuracy Score:", accuracy)
+
+    # 8. Save model and feature extractor
+    joblib.dump(model, "models/sentiment_logreg.pkl")
+    joblib.dump(extractor, "models/tfidf_extractor.pkl")
+
+    # 9. (Optional) Log results
+    with open("models/metrics.txt", "w") as f:
+        f.write("Confusion Matrix:\n")
+        f.write(str(cm))
+        f.write("\n\nAccuracy Score: ")
+        f.write(str(accuracy))
 
 if __name__ == "__main__":
     main()
