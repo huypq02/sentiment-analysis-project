@@ -70,11 +70,11 @@ def main():
     print("Accuracy Score:", accuracy)
 
     # 8. Save model and feature extractor
-    joblib.dump(model, "models/sentiment_logreg.pkl")
-    joblib.dump(extractor, "models/tfidf_extractor.pkl")
+    joblib.dump(model, config['path']['model'])
+    joblib.dump(extractor, config['path']['extractor'])
 
     # 9. (Optional) Log results
-    with open("models/metrics.txt", "w") as f:
+    with open(config['path']['metrics'], "w") as f:
         f.write("Confusion Matrix:\n")
         f.write(str(cm))
         f.write("\n\nAccuracy Score: ")
