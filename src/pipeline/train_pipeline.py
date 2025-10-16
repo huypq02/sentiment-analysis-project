@@ -53,12 +53,20 @@ def main():
     # 5. Extractor Features
     # TODO: consider loading config of a specific feature
     extractor = TFIDFExtractor()
-    X_train_vec = extractor.fit_transform(X_train)
-    X_test_vec = extractor.transform(X_test)
+    feature_train = extractor.fit_transform(X_train)
+    feature_test = extractor.transform(X_test)
 
-    # TODO: will implement 6. Fit and transform the model
+    # 6. Model strategy
     # TODO: consider loading config of a specific model
-    
+    model = LogisticRegressionModel()
+    # TODO: Consider if-else with the model no need feature scaling
+    feature_train_scaled, feature_test_scaled = model.scale_feature(feature_train, feature_test) # Feature scaling
+    model.train(feature_train_scaled, y_train) # Train data on the model
+
+    # 7. Evaluation
+    cm, accuracy = model.evaluate(feature_test_scaled, y_test)
+    print(cm)
+    print(accuracy)
 
 if __name__ == "__main__":
     main()

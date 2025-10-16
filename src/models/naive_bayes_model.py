@@ -9,10 +9,6 @@ class NaiveBayesModel(SentimentModel):
         self.classifier = GaussianNB()
         self.scaler = StandardScaler()
 
-    def train(self, data, labels):
-        """Train the provided data on the Naive Bayes model."""
-        self.classifier.fit(data, labels)
-    
     def scale_feature(self, data, test_data):
         """Feature scaling the provided features.
         This method does NOT modify the input arrays in-place.
@@ -20,6 +16,10 @@ class NaiveBayesModel(SentimentModel):
         data = self.scaler.fit_transform(data)
         test_data = self.scaler.transform(test_data)
         return data, test_data
+
+    def train(self, data, labels):
+        """Train the provided data on the Naive Bayes model."""
+        self.classifier.fit(data, labels)
     
     def predict(self, test_data):
         """Make a prediction."""
