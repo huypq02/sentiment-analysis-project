@@ -7,12 +7,8 @@ class LogisticRegressionModel(SentimentModel):
     def __init__(self):
         """Initialize the Logistic Regression and Standard scaler."""
         self.classifier = LogisticRegression(random_state=0)
-        self.scaler = StandardScaler()
+        self.scaler = StandardScaler(with_mean=False) # with_mean=False works with the sparse matrix
 
-    def train(self, data, labels):
-        """Train Logistic Regression model"""
-        self.classifier.fit(data, labels)
-        
     def scale_feature(self, data, test_data):
         """Feature scaling the provided features.
         This method does NOT modify the input arrays in-place.
@@ -20,6 +16,10 @@ class LogisticRegressionModel(SentimentModel):
         data = self.scaler.fit_transform(data)
         test_data = self.scaler.transform(test_data)
         return data, test_data
+
+    def train(self, data, labels):
+        """Train Logistic Regression model"""
+        self.classifier.fit(data, labels)
 
     def predict(self, test_data):
         """Make predictions"""
