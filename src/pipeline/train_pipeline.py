@@ -1,4 +1,3 @@
-import yaml
 import os
 import joblib
 from sklearn.model_selection import train_test_split
@@ -6,26 +5,12 @@ from src.data.data_loader import DataLoader
 from src.data.preprocessor import Preprocessor
 from src.features.tfidf_extractor import TFIDFExtractor
 from src.models.logreg_model import LogisticRegressionModel
+from src.utils.load_config import load_config
 
-def load_config(path):
-    """Load config safely with error handling."""
-    try:
-        with open(path, 'r') as f:
-            return yaml.safe_load(f)
-    except FileNotFoundError:
-        print(f"Error: Config file '{path}' not found.")
-        return None
-    except yaml.YAMLError as e:
-        print(f"Error: Failed to parse YAML config file '{path}': {e}")
-        return None
-    except Exception as e:
-        print(f"Error: Unexpected error loading config file '{path}': {e}")
-        return None
-
-def main():
+def train_main(config_path='config/config.yaml'):
     """The training pipeline on the model"""
     # 1. Load config
-    config = load_config('config/config.yaml')
+    config = load_config(config_path)
     if config is None:
         exit(1)
     filename = os.path.join(config['file']['directory'], config['file']['name'])
@@ -64,21 +49,11 @@ def main():
     feature_train_scaled, feature_test_scaled = model.scale_feature(feature_train, feature_test) # Feature scaling
     model.train(feature_train_scaled, y_train) # Train data on the model
 
-    # 7. Evaluation
-    cm, accuracy = model.evaluate(feature_test_scaled, y_test)
-    print("Confusion Matrix:\n", cm)
-    print("Accuracy Score:", accuracy)
-
-    # 8. Save model and feature extractor
+     # 7. Save model and feature extractor
     joblib.dump(model, config['path']['model'])
     joblib.dump(extractor, config['path']['extractor'])
 
-    # 9. (Optional) Log results
-    with open(config['path']['metrics'], "w") as f:
-        f.write("Confusion Matrix:\n")
-        f.write(str(cm))
-        f.write("\n\nAccuracy Score: ")
-        f.write(str(accuracy))
+    return model, extractor, feature_test_scaled, y_test, config
 
 if __name__ == "__main__":
-    main()
+    train_main()
