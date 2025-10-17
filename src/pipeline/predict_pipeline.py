@@ -1,8 +1,8 @@
 from .train_pipeline import train_main
 
-def predict_main(model=None, feature_test=None, y_test=None, config=None):
+def predict_main(model=None, feature_test_scaled=None):
     """Make a prediction."""
-    if model is None:
+    if model is None or feature_test_scaled is None:
         # 1-7 Implement the model
         model, _, feature_test_scaled, _, _ = train_main()
 

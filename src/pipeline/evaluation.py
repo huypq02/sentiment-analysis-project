@@ -1,8 +1,6 @@
-import joblib
 from .train_pipeline import train_main
-from .predict_pipeline import predict_main
 
-def evaluation_main(model=None, feature_test=None, y_test=None, config=None):
+def evaluation_main(model=None, y_test=None, config=None):
     """Evaluate model performance (accuracy, f1, confusion matrix...)."""
 
     if model is None:
