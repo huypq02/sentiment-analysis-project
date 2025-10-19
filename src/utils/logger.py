@@ -3,6 +3,7 @@ import logging
 def setup_logging(name, level=logging.INFO):
     """Set up logging with a standard format."""
     logger = logging.getLogger(name)
+    logger.propagate = False
     logger.setLevel(level)
 
     if not logger.handlers:
