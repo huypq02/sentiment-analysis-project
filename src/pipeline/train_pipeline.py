@@ -17,8 +17,8 @@ def train_main(config_path='config/config.yaml'):
     config = load_config(config_path)
     if config is None:
         logger.error("Failed to load configuration. Exiting.")
-        exit(1)
-    filename = os.path.join(config['file']['directory'], config['file']['name'])
+        raise RuntimeError("Failed to load configuration.")
+    filename = os.path.join(config['file']['raw_dir'], config['file']['name'])
 
     try:
         # 2. Load data
@@ -64,10 +64,14 @@ def train_main(config_path='config/config.yaml'):
         logger.exception(f'Unexpected error in training pipeline: {e}')
         return None
 
-     # 7. Save model and feature extractor
+    # 7. Save model and feature extractor
+    # Create new folder with the name 'models' if it doesn't exist
+    os.makedirs(config['model']['dir'], exist_ok=True)
+
     logger.info("Saving model and extractor...")
-    joblib.dump(model, config['path']['model'])
-    joblib.dump(extractor, config['path']['extractor'])
+    # Dump files
+    joblib.dump(model, config['models']['model'])
+    joblib.dump(extractor, config['models']['extractor'])
 
     return model, extractor, feature_test_scaled, y_test, config
 
