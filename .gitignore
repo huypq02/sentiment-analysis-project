@@ -15,10 +15,11 @@ dist/
 notebooks/.ipynb_checkpoints/
 
 # Model files
-/models/
+/models/*
 
 # Data
-/data/
+/data/processed/*
+/data/raw/*
 
 # Logs
 *.log
@@ -31,3 +32,6 @@ Thumbs.db
 # Test outputs
 tests/__pycache__/
 tests/*.log
+
+# Configurations
+config/*
