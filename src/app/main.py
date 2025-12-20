@@ -19,7 +19,7 @@ async def prediction(request: ReviewRequest):
 
     rating = predict_main(text=text)
 
-    print("IMPORT****", rating)
+    # TODO: consider adjusting the type of sentiment based on the rating's result
     if rating >= 4:
         sentiment = "Positive"
     elif rating <= 2:
