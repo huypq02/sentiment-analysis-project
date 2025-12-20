@@ -10,7 +10,7 @@ from src.utils.logger import setup_logging
 
 logger = setup_logging(__name__)
 
-def train_main(config_path='config/config.yaml'):
+def train_main(config_path='config/config.yaml', feature_scaling: bool = False):
     """The training pipeline on the model"""
     # 1. Load config
     logger.info("Loading configuration...")
@@ -56,24 +56,27 @@ def train_main(config_path='config/config.yaml'):
         logger.info("Implementing the model...")
         # TODO: consider loading config of a specific model
         model = LogisticRegressionModel()
-        # TODO: Consider if-else with the model no need feature scaling
-        feature_train_scaled, feature_test_scaled = model.scale_feature(feature_train, feature_test) # Feature scaling
-        model.train(feature_train_scaled, y_train) # Train data on the model
 
+        if feature_scaling:         # TODO: Consider if-else with the model no need feature scaling
+            feature_train_scaled, feature_test_scaled = model.scale_feature(feature_train, feature_test) # Feature scaling
+            model.train(feature_train_scaled, y_train) # Train data on the model
+        else:
+            model.train(feature_train, y_train)
+        
     except Exception as e:
         logger.exception(f'Unexpected error in training pipeline: {e}')
         return None
 
     # 7. Save model and feature extractor
     # Create new folder with the name 'models' if it doesn't exist
-    os.makedirs(config['model']['dir'], exist_ok=True)
+    os.makedirs(config['models']['dir'], exist_ok=True)
 
     logger.info("Saving model and extractor...")
     # Dump files
     joblib.dump(model, config['models']['model'])
     joblib.dump(extractor, config['models']['extractor'])
 
-    return model, extractor, feature_test_scaled, y_test, config
+    return model, extractor, None, y_test, config
 
 if __name__ == "__main__":
     train_main()
