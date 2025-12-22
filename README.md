@@ -38,7 +38,7 @@ sentiment_analysis_project/
 ├── config/            # YAML/JSON for model, feature, data configs
 ├── data/              # raw/processed/external datasets
 ├── models/            # trained model artifacts (.pkl, .pt, etc.)
-├── notebooks/         # Jupyter notebooks for EDA, prototyping
+├── notebooks/         # ⚠️ IN PREPARATION: Jupyter notebooks for EDA, prototyping (not yet implemented)
 ├── src/
 │   ├── data/          # loaders, preprocessors
 │   ├── features/      # base & concrete feature extractors (Strategy Pattern)
@@ -97,6 +97,8 @@ sentiment_analysis_project/
 
 ## Hands-On Roadmap
 
+> **📝 NOTE:** The notebooks referenced below are currently **IN PREPARATION** and have not been implemented yet. The exploratory data analysis and prototyping notebooks will be added in future iterations.
+
 | Step | Concept             | Action                                    | Reference                                                                                                  |
 | ---- | ------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | 1    | **Theory**          | Understand sentiment analysis & ML basics | [SuperDataScience](https://www.superdatascience.com/blogs/the-ultimate-guide-to-regression-classification) |
@@ -129,6 +131,8 @@ sentiment_analysis_project/
 
 ## Deployment & MLOps
 
+> **🚧 DEVELOPMENT STATUS:** The following MLOps practices and deployment capabilities are **PLANNED BUT NOT FULLY IMPLEMENTED**. This section outlines the intended production-ready architecture for future implementation.
+
 - **Artifact Management:** Save/load models in `models/`; use config for reproducible runs.
 - **API Serving:** Use FastAPI or Streamlit for model inference.
 - **Testing:** Run unit/integration tests in `tests/` before deployment.
@@ -154,4 +158,11 @@ For questions, guidance, or code reviews, open an issue or discussion.
 
 ---
 
-**Ready to get started? Clone this repo, check the `notebooks/` for initial EDA, then dive into `src/` for modular ML engineering!**
+> **⚠️ CURRENT PROJECT STATUS:**
+>
+> - ✅ Core ML pipeline architecture implemented
+> - 🚧 Notebooks for EDA and prototyping: **IN PREPARATION**
+> - 🚧 Full MLOps deployment pipeline: **IN PREPARATION**
+> - 🚧 API serving layer: **IN PREPARATION**
+
+**Ready to get started? Clone this repo and dive into `src/` for the modular ML engineering foundation. Notebooks and deployment features coming soon!**
