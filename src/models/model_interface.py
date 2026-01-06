@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class SentimentModel(ABC):
     @abstractmethod
     def scale_feature(self, data, test_data):
@@ -9,7 +10,7 @@ class SentimentModel(ABC):
     @abstractmethod
     def train(self, data, labels):
         """Train the model using the provided data and labels."""
-        pass        
+        pass
 
     @abstractmethod
     def predict(self, test_data):

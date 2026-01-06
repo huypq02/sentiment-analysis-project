@@ -1,6 +1,7 @@
 import pandas as pd
 
-class DataLoader():
+
+class DataLoader:
     def __init__(self):
         pass
 

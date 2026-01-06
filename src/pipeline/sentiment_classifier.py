@@ -1,5 +1,6 @@
 from data.preprocessor import Preprocessor
 
+
 class SentimentClassifier:
     def __init__(self, model_strategy):
         """Initialize essential parameters for a model."""

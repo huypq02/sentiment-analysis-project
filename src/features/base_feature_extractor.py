@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class BaseFeatureExtractor(ABC):
     """Abstract base class for feature extraction strategies."""
 
@@ -7,7 +8,7 @@ class BaseFeatureExtractor(ABC):
     def fit(self, sentences):
         """Fit the extractor on training texts."""
         pass
-    
+
     @abstractmethod
     def transform(self, sentences):
         """Transform text into numerical representations."""

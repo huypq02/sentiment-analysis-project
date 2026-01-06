@@ -1,9 +1,10 @@
 import yaml
 
+
 def load_config(path):
     """Load config safely with error handling."""
     try:
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             return yaml.safe_load(f)
     except FileNotFoundError:
         print(f"Error: Config file '{path}' not found.")
