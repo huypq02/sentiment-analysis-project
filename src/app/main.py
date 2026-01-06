@@ -10,8 +10,9 @@ def health_check():
     return {
         "status": "healthy",
         "service": "Sentiment Analysis API",
-        "version": "1.0.0"
+        "version": "1.0.0",
     }
+
 
 @app.post("/predict")
 async def prediction(request: ReviewRequest):
@@ -27,6 +28,4 @@ async def prediction(request: ReviewRequest):
     else:
         sentiment = "Neutral"
 
-    return ReviewResponse(text=text, 
-                          rating=rating, 
-                          sentiment=sentiment)
+    return ReviewResponse(text=text, rating=rating, sentiment=sentiment)

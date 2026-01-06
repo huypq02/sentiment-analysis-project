@@ -3,11 +3,12 @@ import numpy as np
 from src.models.logreg_model import LogisticRegressionModel
 from src.models.naive_bayes_model import NaiveBayesModel
 
+
 class TestLogisticRegressionModel(unittest.TestCase):
     def setUp(self):
         """Create an object, variables for the unit test functions."""
         self.model = LogisticRegressionModel()
-        # Dummy data: 4 samples, 
+        # Dummy data: 4 samples,
         # including 2 features (X_train, X_test) and 2 targets (y_train, y_test)
         self.X_train = np.array([[1, 2], [2, 1], [1, 0], [0, 1]])
         self.y_train = np.array([0, 1, 0, 1])
@@ -19,10 +20,12 @@ class TestLogisticRegressionModel(unittest.TestCase):
         self.model.train(self.X_train, self.y_train)
         self.assertTrue(hasattr(self.model.classifier, "coef_"))
         self.assertTrue(hasattr(self.model.classifier, "classes_"))
-        
+
     def test_scale_feature(self):
         """Unit test for feature scaling."""
-        scaled_feature_train, scaled_feature_test = self.model.scale_feature(self.X_train, self.X_test)
+        scaled_feature_train, scaled_feature_test = self.model.scale_feature(
+            self.X_train, self.X_test
+        )
         self.assertEqual(scaled_feature_train.shape, self.X_train.shape)
         self.assertEqual(scaled_feature_test.shape, self.X_test.shape)
 
@@ -39,11 +42,12 @@ class TestLogisticRegressionModel(unittest.TestCase):
         self.assertIsInstance(cm, np.ndarray)
         self.assertIsInstance(accuracy, float)
 
+
 class TestNaiveBayesModel(unittest.TestCase):
     def setUp(self):
         """Create an object, variables for the unit test functions."""
         self.model = NaiveBayesModel()
-        # Dummy data: 4 samples, 
+        # Dummy data: 4 samples,
         # including 2 features (X_train, X_test) and 2 targets (y_train, y_test)
         self.X_train = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
         self.y_train = np.array([0, 1, 0, 1])
@@ -55,10 +59,12 @@ class TestNaiveBayesModel(unittest.TestCase):
         self.model.train(self.X_train, self.y_train)
         self.assertTrue(hasattr(self.model.classifier, "class_count_"))
         self.assertTrue(hasattr(self.model.classifier, "classes_"))
-        
+
     def test_scale_feature(self):
         """Unit test for feature scaling."""
-        scaled_feature_train, scaled_feature_test = self.model.scale_feature(self.X_train, self.X_test)
+        scaled_feature_train, scaled_feature_test = self.model.scale_feature(
+            self.X_train, self.X_test
+        )
         self.assertEqual(scaled_feature_train.shape, self.X_train.shape)
         self.assertEqual(scaled_feature_test.shape, self.X_test.shape)
 
@@ -74,6 +80,7 @@ class TestNaiveBayesModel(unittest.TestCase):
         cm, accuracy = self.model.evaluate(self.X_test, self.y_test)
         self.assertIsInstance(cm, np.ndarray)
         self.assertIsInstance(accuracy, float)
+
 
 if __name__ == "__main__":
     unittest.main()
