@@ -3,7 +3,7 @@ Module to initialize the main src package
 Provides the imports at the package-level.
 """
 
-__version__ = '2.0.0'
+__version__ = "2.0.0"
 __author__ = "Huy Pham"
 __email__ = "huypham0297@gmail.com"
 
@@ -14,16 +14,16 @@ from .pipeline import train_main, predict_main, evaluation_main, SentimentClassi
 from .utils import load_config, setup_logging
 
 __all__ = [
-    'DataLoader',
-    'Preprocessor',
-    'BagOfWordsExtractor',
-    'TFIDFExtractor',
-    'LogisticRegressionModel',
-    'NaiveBayesModel',
-    'train_main',
-    'predict_main',
-    'evaluation_main',
-    'SentimentClassifier',
-    'load_config',
-    'setup_logging',
+    "DataLoader",
+    "Preprocessor",
+    "BagOfWordsExtractor",
+    "TFIDFExtractor",
+    "LogisticRegressionModel",
+    "NaiveBayesModel",
+    "train_main",
+    "predict_main",
+    "evaluation_main",
+    "SentimentClassifier",
+    "load_config",
+    "setup_logging",
 ]

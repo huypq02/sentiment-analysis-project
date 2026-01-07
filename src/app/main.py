@@ -31,7 +31,8 @@ async def prediction(request: ReviewRequest):
 
     return ReviewResponse(text=text, rating=rating, sentiment=sentiment)
 
+
 if __name__ == "__main__":
-    config = uvicorn.Config("src.app.main:app", port=5000, log_level="info")
+    config = uvicorn.Config("src.app.main:app", port=8080, log_level="info")
     server = uvicorn.Server(config)
     server.run()
