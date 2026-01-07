@@ -9,6 +9,7 @@ def ensure_nltk_resources():
         nltk.data.find("tokenizers/punkt")
     except LookupError:
         nltk.download("punkt")
+        nltk.download("punkt_tab")
 
     try:
         nltk.data.find("corpora/stopwords")
@@ -23,7 +24,7 @@ class Preprocessor:
     def preprocess(self, text):
         """Implement stop words, lowercase, punctuation removal and tokenization"""
         # Lowercase and Punctuation Removal
-        text = re.sub("[^\w\s\-]", " ", text).lower()
+        text = re.sub(r"[^\w\s\-]", " ", text).lower()
 
         # Define English Stop word
         en_stopwords = stopwords.words("english")
