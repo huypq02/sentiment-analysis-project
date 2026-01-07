@@ -13,4 +13,4 @@ EXPOSE 8080
 RUN useradd app
 USER app
 
-CMD [ "uvicorn", "src.app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8080"]
+CMD [ "uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8080"]
