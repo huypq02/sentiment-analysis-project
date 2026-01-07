@@ -1,7 +1,6 @@
 import unittest
 import numpy as np
-from src.models.logreg_model import LogisticRegressionModel
-from src.models.naive_bayes_model import NaiveBayesModel
+from src import LogisticRegressionModel, NaiveBayesModel
 
 
 class TestLogisticRegressionModel(unittest.TestCase):

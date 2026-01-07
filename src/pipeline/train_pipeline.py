@@ -1,12 +1,10 @@
 import os
 import joblib
 from sklearn.model_selection import train_test_split
-from src.data.data_loader import DataLoader
-from src.data.preprocessor import Preprocessor
-from src.features.tfidf_extractor import TFIDFExtractor
-from src.models.logreg_model import LogisticRegressionModel
-from src.utils.load_config import load_config
-from src.utils.logger import setup_logging
+from src.data import DataLoader, Preprocessor
+from src.features import TFIDFExtractor
+from src.models import LogisticRegressionModel
+from src.utils import load_config, setup_logging
 
 logger = setup_logging(__name__)
 

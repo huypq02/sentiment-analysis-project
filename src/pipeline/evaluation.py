@@ -1,5 +1,5 @@
 from .train_pipeline import train_main
-from src.utils.logger import setup_logging
+from src.utils import setup_logging
 
 logger = setup_logging(__name__)
 

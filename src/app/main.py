@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from src.pipeline.predict_pipeline import predict_main
+from src.pipeline import predict_main
 from .schemas import ReviewRequest, ReviewResponse
 
 app = FastAPI()
