@@ -78,6 +78,10 @@ jobs:
     name: Build Docker
     runs-on: ubuntu-latest
 
+    needs:
+      - run-linters
+      - run-test
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
