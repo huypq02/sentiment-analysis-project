@@ -1,4 +1,3 @@
-import coverage
 import unittest
 import numpy as np
 from src import BagOfWordsExtractor, TFIDFExtractor

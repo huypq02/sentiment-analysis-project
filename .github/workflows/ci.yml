@@ -73,3 +73,20 @@ jobs:
         run: |
           python -m coverage run -m unittest
           python -m coverage report -m
+
+  build-docker:
+    name: Build Docker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Build Dockerfile
+        run: docker build .

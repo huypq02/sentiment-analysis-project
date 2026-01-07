@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+import uvicorn
 from src.pipeline import predict_main
 from .schemas import ReviewRequest, ReviewResponse
 
@@ -29,3 +30,8 @@ async def prediction(request: ReviewRequest):
         sentiment = "Neutral"
 
     return ReviewResponse(text=text, rating=rating, sentiment=sentiment)
+
+if __name__ == "__main__":
+    config = uvicorn.Config("src.app.main:app", port=5000, log_level="info")
+    server = uvicorn.Server(config)
+    server.run()
