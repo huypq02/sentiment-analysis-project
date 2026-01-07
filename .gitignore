@@ -33,5 +33,11 @@ Thumbs.db
 tests/__pycache__/
 tests/*.log
 
+# Coverage
+.coverage
+.coverage.*
+htmlcov/
+*.cover
+
 # Configurations
 config/*

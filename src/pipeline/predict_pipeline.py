@@ -1,7 +1,7 @@
 import pandas as pd
 from .train_pipeline import train_main
-from src.utils.logger import setup_logging
-from src.data.preprocessor import Preprocessor
+from src.utils import setup_logging
+from src.data import Preprocessor
 
 logger = setup_logging(__name__)
 

@@ -1,7 +1,7 @@
+import coverage
 import unittest
 import numpy as np
-from src.features.bow_extractor import BagOfWordsExtractor
-from src.features.tfidf_extractor import TFIDFExtractor
+from src import BagOfWordsExtractor, TFIDFExtractor
 
 
 class TestBagOfWordsExtractor(unittest.TestCase):

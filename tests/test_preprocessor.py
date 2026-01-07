@@ -1,5 +1,5 @@
 import unittest
-from src.data.preprocessor import Preprocessor
+from src import Preprocessor
 
 
 class TestPreprocessor(unittest.TestCase):
