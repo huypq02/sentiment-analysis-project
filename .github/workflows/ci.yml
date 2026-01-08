@@ -100,4 +100,4 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: ${{ vars.DOCKERHUB_USERNAME != '' }}
-          tags: user/app:latest
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/sentiment-analysis-project:latest
