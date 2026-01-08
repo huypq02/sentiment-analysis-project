@@ -82,7 +82,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Login to Docker Hub
+      - name: Login to Docker Hub with ${{ vars.DOCKERHUB_USERNAME }}
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
