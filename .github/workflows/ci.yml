@@ -77,6 +77,10 @@ jobs:
   build-docker:
     name: Build Docker Image
     runs-on: ubuntu-latest
+
+    needs:
+      - run-test
+
     environment: docker
 
     steps:
