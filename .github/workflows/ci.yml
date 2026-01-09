@@ -6,11 +6,6 @@ on:
       - main
       - develop
       - "releases/**"
-  pull_request:
-    branches:
-      - main
-      - develop
-      - "releases/**"
 
 # Down scope as necessary via https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token
 permissions:
@@ -77,6 +72,8 @@ jobs:
   build-docker:
     name: Build Docker Image
     runs-on: ubuntu-latest
+    # Only run on push to main/develop (not on PRs) to save costs
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     needs:
       - run-test
@@ -103,5 +100,10 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
+          context: .
+          # Only push to Docker Hub on main branch
           push: ${{ vars.DOCKERHUB_USERNAME != '' }}
           tags: ${{ vars.DOCKERHUB_USERNAME }}/sentiment-analysis-project:latest
+          # Enable caching to speed up builds and reduce costs
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
