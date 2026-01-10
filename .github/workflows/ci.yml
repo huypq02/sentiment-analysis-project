@@ -2,9 +2,7 @@ name: CI - Tests & Quality Checks
 run-name: CI triggered by ${{ github.actor }}
 on:
   push:
-    branches:
-      - main
-      - "releases/**"
+    branches: [main]
 
 # Down scope as necessary via https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token
 permissions:
@@ -77,7 +75,7 @@ jobs:
     needs:
       - run-test
 
-    environment: docker
+    environment: production
 
     steps:
       - name: Checkout
@@ -100,7 +98,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          # Only push to Docker Hub on main branch
           push: ${{ vars.DOCKERHUB_USERNAME != '' }}
           tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
           # Enable caching to speed up builds and reduce costs

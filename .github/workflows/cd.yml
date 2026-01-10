@@ -1,0 +1,21 @@
+name: CD - Deployment
+run-name: CD triggered by ${{ github.actor }}
+
+concurrency: production
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: deploy
+        # ...deployment-specific steps
