@@ -1,13 +1,12 @@
-name: CD - Deployment
+name: CD - Continuous Deployment
 run-name: CD triggered by ${{ github.actor }}
 
 concurrency: production
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
+  workflow_run:
+    workflows: ["CI - Tests & Quality Checks"]
+    types: [completed]
     branches:
       - main
   workflow_dispatch:
@@ -16,6 +15,12 @@ jobs:
   deployment:
     runs-on: ubuntu-latest
     environment: production
+
     steps:
-      - name: deploy
-        # ...deployment-specific steps
+      - name: Deploy app on Render
+        # Only run this step if the branch is main
+        if: github.ref == 'refs/heads/main'
+        env:
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
