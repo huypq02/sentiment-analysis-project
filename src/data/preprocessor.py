@@ -3,28 +3,31 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 
+
 def ensure_nltk_resources():
     try:
-        nltk.data.find('tokenizers/punkt')
+        nltk.data.find("tokenizers/punkt")
     except LookupError:
-        nltk.download('punkt')
+        nltk.download("punkt")
+        nltk.download("punkt_tab")
 
     try:
-        nltk.data.find('corpora/stopwords')
+        nltk.data.find("corpora/stopwords")
     except LookupError:
-        nltk.download('stopwords')
+        nltk.download("stopwords")
 
-class Preprocessor():
+
+class Preprocessor:
     def __init__(self):
         ensure_nltk_resources()
-    
+
     def preprocess(self, text):
         """Implement stop words, lowercase, punctuation removal and tokenization"""
         # Lowercase and Punctuation Removal
-        text = re.sub("[^\w\s\-]", " ", text).lower()
+        text = re.sub(r"[^\w\s\-]", " ", text).lower()
 
         # Define English Stop word
-        en_stopwords = stopwords.words('english')
+        en_stopwords = stopwords.words("english")
 
         # Tokenization
         tokens = word_tokenize(text)

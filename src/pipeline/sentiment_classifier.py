@@ -1,4 +1,5 @@
-from data.preprocessor import Preprocessor
+from src.data import Preprocessor
+
 
 class SentimentClassifier:
     def __init__(self, model_strategy):
