@@ -12,11 +12,12 @@ This project builds a robust sentiment classification system for product reviews
 2. [Project Structure](#project-structure)
 3. [Requirements](#requirements)
 4. [How It Works](#how-it-works)
-5. [Hands-On Roadmap](#hands-on-roadmap)
-6. [Theory & Best Practices](#theory--best-practices)
-7. [Evaluation & Metrics](#evaluation--metrics)
-8. [Deployment & MLOps](#deployment--mlops)
-9. [References & Further Study](#references--further-study)
+5. [API Usage (FastAPI)](#api-usage-fastapi)
+6. [Hands-On Roadmap](#hands-on-roadmap)
+7. [Theory & Best Practices](#theory--best-practices)
+8. [Evaluation & Metrics](#evaluation--metrics)
+9. [Deployment & MLOps](#deployment--mlops)
+10. [References & Further Study](#references--further-study)
 
 ---
 
@@ -95,6 +96,50 @@ sentiment_analysis_project/
 
 ---
 
+## API Usage (FastAPI)
+
+The FastAPI service is implemented in `src/app/main.py` and runs on port **8080**.
+
+### Run locally
+
+- Run via Uvicorn:
+  - `uvicorn src.app.main:app --host 0.0.0.0 --port 8080`
+- Or run the module directly:
+  - `python -m src.app.main`
+
+### Endpoints
+
+#### `GET /health`
+
+- Example:
+  - `curl http://localhost:8080/health`
+- Response:
+  - `{"status":"healthy","service":"Sentiment Analysis API","version":"1.0.0"}`
+
+#### `POST /predict`
+
+- Request schema:
+  - `{"text": "review text"}`
+- Example:
+  - `curl -X POST http://localhost:8080/predict -H "Content-Type: application/json" -d "{\"text\":\"This product is amazing!\"}"`
+- Response schema:
+  - `{"text": "review text", "rating": <score>, "sentiment": "<Positive|Neutral|Negative>"}`
+
+Sentiment thresholds:
+
+- Positive: rating ≥ 4
+- Neutral: rating = 3
+- Negative: rating ≤ 2
+
+### Schemas
+
+Request/response schemas are defined in `src/app/schemas.py`:
+
+- `ReviewRequest(text: str)`
+- `ReviewResponse(text: str, rating: float, sentiment: str)`
+
+---
+
 ## Hands-On Roadmap
 
 > **📝 NOTE:** The notebooks referenced below are currently **IN PREPARATION** and have not been implemented yet. The exploratory data analysis and prototyping notebooks will be added in future iterations.
@@ -131,10 +176,9 @@ sentiment_analysis_project/
 
 ## Deployment & MLOps
 
-> **🚧 DEVELOPMENT STATUS:** The following MLOps practices and deployment capabilities are **PLANNED BUT NOT FULLY IMPLEMENTED**. This section outlines the intended production-ready architecture for future implementation.
-
 - **Artifact Management:** Save/load models in `models/`; use config for reproducible runs.
-- **API Serving:** Use FastAPI or Streamlit for model inference.
+- **API Serving:** FastAPI app available in `src/app/` with `/health` and `/predict`.
+- **CI/CD:** GitHub Actions workflows for CI (lint + tests + optional Docker build) and CD (deploy on Render after CI success).
 - **Testing:** Run unit/integration tests in `tests/` before deployment.
 - **Versioning:** Track code in git, data/models in .gitignore.
 
@@ -162,7 +206,7 @@ For questions, guidance, or code reviews, open an issue or discussion.
 >
 > - ✅ Core ML pipeline architecture implemented
 > - 🚧 Notebooks for EDA and prototyping: **IN PREPARATION**
-> - 🚧 Full MLOps deployment pipeline: **IN PREPARATION**
-> - 🚧 API serving layer: **IN PREPARATION**
+> - ✅ CI/CD pipeline (GitHub Actions + Render deploy hook)
+> - ✅ API serving layer (FastAPI)
 
 **Ready to get started? Clone this repo and dive into `src/` for the modular ML engineering foundation. Notebooks and deployment features coming soon!**
