@@ -25,6 +25,11 @@ notebooks/.ipynb_checkpoints/
 *.log
 logs/
 
+# MLflow
+mlflow.db
+mlruns/
+mlartifacts/
+
 # OS files
 .DS_Store
 Thumbs.db
