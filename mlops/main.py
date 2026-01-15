@@ -86,7 +86,7 @@ def main(config_path: str = "config/config.yaml", feature_scaling: bool = False)
         mlflow.log_metric("accuracy", accuracy)
 
         # Optional: Set a tag that we can use to remind ourselves what this run was for
-        mlflow.set_tag("Training Info", "Basic LR model for iris data")
+        mlflow.set_tag("Training Info", "Basic LR model for the product review data")
 
 if __name__ == "__main__":
     main()
