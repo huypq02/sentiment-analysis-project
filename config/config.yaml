@@ -1,0 +1,8 @@
+file:
+  raw_dir: "data/raw"
+  name: "book_reviews_sample.csv"
+models:
+  dir: "models"
+  model: "models/sentiment_logreg.pkl"
+  extractor: "models/tfidf_extractor.pkl"
+  metrics: "models/metrics.txt"
