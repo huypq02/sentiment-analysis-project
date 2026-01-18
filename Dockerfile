@@ -1,13 +1,9 @@
 FROM python:3.13
-WORKDIR /usr/local/app
+WORKDIR /usr/local/app/sentiment-analysis
 
 # Install the application dependencies
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt && \
-    python -c "import nltk; \
-    nltk.download('punkt', download_dir='/usr/local/share/nltk_data'); \
-    nltk.download('punkt_tab', download_dir='/usr/local/share/nltk_data'); \
-    nltk.download('stopwords', download_dir='/usr/local/share/nltk_data')"
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy in the source code
 COPY src ./src
@@ -17,7 +13,7 @@ COPY data ./data
 EXPOSE 8080
 
 # Setup an app user so the container doesn't run as the root user
-RUN useradd app && chown -R app:app /usr/local/app
+RUN useradd -m app && chown -R app:app /usr/local/app/sentiment-analysis
 
 USER app
 
