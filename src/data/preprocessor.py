@@ -19,7 +19,8 @@ def ensure_nltk_resources():
 
 class Preprocessor:
     def __init__(self):
-        ensure_nltk_resources()
+        # ensure_nltk_resources()
+        pass
 
     def preprocess(self, text):
         """Implement stop words, lowercase, punctuation removal and tokenization"""
