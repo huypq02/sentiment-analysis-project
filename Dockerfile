@@ -10,17 +10,16 @@ RUN pip install --no-cache-dir -r requirements.txt && \
     nltk.download('stopwords', download_dir='/usr/local/share/nltk_data')"
 
 # Copy in the source code
-COPY src ./src
-COPY config ./config
-COPY data ./data
+COPY src config data ./
 
 EXPOSE 8080
 
 # Setup an app user so the container doesn't run as the root user
-RUN useradd app
-USER app
+RUN useradd app && chown -R app:app /usr/local/app
 
 # Set NLTK data path so it finds the downloaded data
 ENV NLTK_DATA=/usr/local/share/nltk_data
+
+USER app
 
 CMD [ "uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8080"]
