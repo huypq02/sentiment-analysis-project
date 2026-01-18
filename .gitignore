@@ -16,14 +16,22 @@ notebooks/.ipynb_checkpoints/
 
 # Model files
 /models/*
+!models/*.txt
 
 # Data
 /data/processed/*
 /data/raw/*
+# Allow small sample for testing
+!data/raw/book_reviews_sample.csv
 
 # Logs
 *.log
 logs/
+
+# MLflow
+mlflow.db
+mlruns/
+mlartifacts/
 
 # OS files
 .DS_Store
@@ -38,6 +46,3 @@ tests/*.log
 .coverage.*
 htmlcov/
 *.cover
-
-# Configurations
-config/*
