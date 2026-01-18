@@ -6,7 +6,9 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy in the source code
-COPY src config data models ./
+COPY src ./src
+COPY config ./config
+
 EXPOSE 8080
 
 # Setup an app user so the container doesn't run as the root user
