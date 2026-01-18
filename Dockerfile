@@ -19,8 +19,8 @@ EXPOSE 8080
 # Setup an app user so the container doesn't run as the root user
 RUN useradd app && chown -R app:app /usr/local/app
 
-# Set NLTK data path so it finds the downloaded data
-ENV NLTK_DATA=/usr/local/share/nltk_data
+# # Set NLTK data path so it finds the downloaded data
+# ENV NLTK_DATA=/usr/local/share/nltk_data
 
 USER app
 
