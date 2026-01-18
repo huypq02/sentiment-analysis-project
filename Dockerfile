@@ -8,6 +8,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy in the source code
 COPY src ./src
 COPY config ./config
+COPY data ./data
+
+RUN mkdir -p models
 
 EXPOSE 8080
 
