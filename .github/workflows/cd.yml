@@ -17,8 +17,8 @@ on:
 jobs:
   deployment:
     runs-on: ubuntu-latest
-    # Only deploy from main branch and CI workflow succeeded
-    if: (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    # Only deploy when CI workflow succeeded on main
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
     environment:
       name: production
       url: ${{ vars.RENDER_APP_URL }}
