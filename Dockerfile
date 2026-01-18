@@ -20,4 +20,7 @@ EXPOSE 8080
 RUN useradd app
 USER app
 
+# Set NLTK data path so it finds the downloaded data
+ENV NLTK_DATA=/usr/local/share/nltk_data
+
 CMD [ "uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8080"]
