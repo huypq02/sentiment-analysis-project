@@ -12,6 +12,10 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 # Copy in the source code
 COPY src config data ./
 
+# Add this temporarily after COPY to debug
+RUN ls -la /usr/local/app
+RUN ls -la /usr/local/app/src
+
 EXPOSE 8080
 
 # Setup an app user so the container doesn't run as the root user
