@@ -10,11 +10,9 @@ RUN pip install --no-cache-dir -r requirements.txt && \
     nltk.download('stopwords', download_dir='/usr/local/share/nltk_data')"
 
 # Copy in the source code
-COPY src config data ./
-
-# Add this temporarily after COPY to debug
-RUN ls -la /usr/local/app
-RUN ls -la /usr/local/app/src
+COPY src ./src
+COPY config ./config
+COPY data ./data
 
 EXPOSE 8080
 
