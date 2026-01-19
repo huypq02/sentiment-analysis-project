@@ -11,12 +11,14 @@ logger = setup_logging(__name__)
 
 
 def main(config_path: str = "config/config.yaml", feature_scaling: bool = False):
-    """Train and evaluate a Logistic Regression model on the Iris dataset with MLflow tracking."""
-    mlflow.set_experiment("Sentiment Analysis")
+    """Train and evaluate a Logistic Regression model on the product reviews dataset with MLflow tracking."""
+
+    mlflow.end_run()
+    
+    mlflow.set_experiment("sentiment-analysis")
 
     # Load config
     logger.info("Loading configuration...")
-    mlflow.log_params("config_file", config_path)
     config = load_config(config_path)
     if config is None:
         logger.error("Failed to load configuration. Exiting.")
@@ -44,18 +46,13 @@ def main(config_path: str = "config/config.yaml", feature_scaling: bool = False)
     params = {
         "solver": "lbfgs",
         "max_iter": 1000,
-        "multi_class": "auto",
         "random_state": 8888,
     }
 
     # Start an MLflow run
-    with mlflow.start_run():
-        # Log the hyperparameters
+    with mlflow.start_run() as run:
+        # Log configuration and hyperparameters
         mlflow.log_params(params)
-
-        # Train the model
-        lr = LogisticRegression(**params)
-        lr.fit(X_train, y_train)
 
         # Extractor Features
         logger.info("Implementing the extractor feature...")
@@ -65,10 +62,12 @@ def main(config_path: str = "config/config.yaml", feature_scaling: bool = False)
 
         # Model strategy
         logger.info("Implementing the model...")
-        model = LogisticRegressionModel()
+        model = LogisticRegressionModel(params)
 
         # Log the model
-        model_info = mlflow.sklearn.log_model(sk_model=model, name="sentiment_model")
+        mlflow.sklearn.log_model(sk_model=model.classifier, 
+                                              name="model",
+                                              registered_model_name="sentiment-classifier")
 
         if (
             feature_scaling
@@ -81,12 +80,21 @@ def main(config_path: str = "config/config.yaml", feature_scaling: bool = False)
             model.train(feature_train, y_train)
 
         # Predict on the test set, compute and log the loss metric
-        y_pred = model.predict(X_test)
+        y_pred = model.predict(feature_test)
         accuracy = accuracy_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred, average='micro')
+
+        mlflow.log_param("model_type", "LogisticRegression")
         mlflow.log_metric("accuracy", accuracy)
+        mlflow.log_metric("f1_score", f1)
 
         # Optional: Set a tag that we can use to remind ourselves what this run was for
-        mlflow.set_tag("Training Info", "Basic LR model for the product review data")
+        mlflow.set_tag("Training Sentiment Info", "Basic LR model for the product review data")
+
+    run_id = run.info.run_id
+    print(
+        f"run_id: {run_id}; lifecycle_stage: {mlflow.get_run(run_id).info.lifecycle_stage}"
+    )
 
 if __name__ == "__main__":
     main()

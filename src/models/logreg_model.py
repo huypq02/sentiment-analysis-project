@@ -5,9 +5,9 @@ from .model_interface import SentimentModel
 
 
 class LogisticRegressionModel(SentimentModel):
-    def __init__(self):
+    def __init__(self, param: dict = {"random_state": 0}):
         """Initialize the Logistic Regression and Standard scaler."""
-        self.classifier = LogisticRegression(random_state=0)
+        self.classifier = LogisticRegression(**param)
         self.scaler = StandardScaler(
             with_mean=False
         )  # with_mean=False works with the sparse matrix
