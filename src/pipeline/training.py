@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from src.data import DataLoader, Preprocessor
 from src.features import TFIDFExtractor
 from src.models import LogisticRegressionModel
-from src.utils import load_config, setup_logging, rating_to_sentiment_numeric
+from src.utils import load_config, setup_logging
 
 logger = setup_logging(__name__)
 
