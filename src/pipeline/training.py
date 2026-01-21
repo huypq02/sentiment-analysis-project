@@ -4,12 +4,12 @@ from sklearn.model_selection import train_test_split
 from src.data import DataLoader, Preprocessor
 from src.features import TFIDFExtractor
 from src.models import LogisticRegressionModel
-from src.utils import load_config, setup_logging
+from src.utils import load_config, setup_logging, rating_to_sentiment_numeric
 
 logger = setup_logging(__name__)
 
 
-def train_main(config_path="config/config.yaml", feature_scaling: bool = False):
+def train(config_path="config/config.yaml", feature_scaling: bool = False):
     """The training pipeline on the model"""
     # 1. Load config
     logger.info("Loading configuration...")
@@ -34,7 +34,10 @@ def train_main(config_path="config/config.yaml", feature_scaling: bool = False):
         df["reviewText_clean"] = df["reviewText"].apply(preprocessor.preprocess)
         # Convert df['reviewText_clean'] from tokens to string X
         texts_cleaned = df["reviewText_clean"].apply(lambda x: " ".join(x))
-        labels = df["rating"]
+        
+        # Convert ratings (1-5) to sentiment labels (0=Negative, 1=Neutral, 2=Positive)
+        labels = df["rating"].apply(rating_to_sentiment_numeric)
+        logger.info(f"Sentiment distribution: {labels.value_counts().to_dict()}")
 
         # 4. Split
         logger.info("Splitting dataset...")
@@ -43,17 +46,27 @@ def train_main(config_path="config/config.yaml", feature_scaling: bool = False):
             texts_cleaned, labels, test_size=0.2, random_state=0
         )
 
-        # 5. Extractor Features
+        # 5. Extractor Features with n-grams
         logger.info("Implementing the extractor feature...")
         # TODO: consider loading config of a specific feature
-        extractor = TFIDFExtractor()
+        extractor = TFIDFExtractor(
+            max_features=5000,
+            ngram_range=(1, 2),  # Unigrams + bigrams to capture phrases like "not bad"
+            min_df=2,
+            max_df=0.9
+        )
         feature_train = extractor.fit_transform(X_train)
         feature_test = extractor.transform(X_test)
+        logger.info(f"Feature matrix shape: train={feature_train.shape}, test={feature_test.shape}")
 
-        # 6. Model strategy
+        # 6. Model strategy with class balancing
         logger.info("Implementing the model...")
         # TODO: consider loading config of a specific model
-        model = LogisticRegressionModel()
+        model = LogisticRegressionModel({
+            'random_state': 0,
+            'max_iter': 1000,
+            'class_weight': 'balanced'  # Handle class imbalance
+        })
 
         if (
             feature_scaling
@@ -64,6 +77,7 @@ def train_main(config_path="config/config.yaml", feature_scaling: bool = False):
             model.train(feature_train_scaled, y_train)  # Train data on the model
         else:
             model.train(feature_train, y_train)
+            feature_test_scaled = feature_test  # Use unscaled features
 
     except Exception as e:
         logger.exception(f"Unexpected error in training pipeline: {e}")
@@ -78,8 +92,8 @@ def train_main(config_path="config/config.yaml", feature_scaling: bool = False):
     joblib.dump(model, config["models"]["model"])
     joblib.dump(extractor, config["models"]["extractor"])
 
-    return model, extractor, None, y_test, config
+    return model, extractor, feature_test_scaled, y_test, config
 
 
 if __name__ == "__main__":
-    train_main()
+    train()

@@ -1,6 +1,13 @@
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import (
+    confusion_matrix, 
+    accuracy_score, 
+    precision_score, 
+    recall_score, 
+    f1_score,
+    classification_report
+)
 from .model_interface import SentimentModel
 
 
@@ -29,8 +36,17 @@ class LogisticRegressionModel(SentimentModel):
         return self.classifier.predict(test_data)
 
     def evaluate(self, test_data, test_labels):
-        """Evaluate Logistic Regression model"""
+        """Evaluate Logistic Regression model with comprehensive metrics"""
         y_pred = self.classifier.predict(test_data)
-        cm = confusion_matrix(test_labels, y_pred)  # Confusion matrix
-        accuracy = accuracy_score(test_labels, y_pred)  # Accuracy score
-        return cm, accuracy
+        
+        return {
+            'confusion_matrix': confusion_matrix(test_labels, y_pred),
+            'accuracy': accuracy_score(test_labels, y_pred),
+            'precision_macro': precision_score(test_labels, y_pred, average='macro', zero_division=0),
+            'recall_macro': recall_score(test_labels, y_pred, average='macro', zero_division=0),
+            'f1_macro': f1_score(test_labels, y_pred, average='macro', zero_division=0),
+            'precision_weighted': precision_score(test_labels, y_pred, average='weighted', zero_division=0),
+            'recall_weighted': recall_score(test_labels, y_pred, average='weighted', zero_division=0),
+            'f1_weighted': f1_score(test_labels, y_pred, average='weighted', zero_division=0),
+            'classification_report': classification_report(test_labels, y_pred, zero_division=0)
+        }

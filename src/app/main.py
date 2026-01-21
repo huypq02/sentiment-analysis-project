@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import uvicorn
-from src.pipeline import predict_main
+from src.pipeline import predict
+from src.utils import rating_to_sentiment
 from .schemas import ReviewRequest, ReviewResponse
 
 app = FastAPI()
@@ -19,15 +20,8 @@ def health_check():
 async def prediction(request: ReviewRequest):
     text = request.text
 
-    rating = predict_main(text=text)
-
-    # TODO: consider adjusting the type of sentiment based on the rating's result
-    if rating >= 4:
-        sentiment = "Positive"
-    elif rating <= 2:
-        sentiment = "Negative"
-    else:
-        sentiment = "Neutral"
+    rating = predict(text=text)
+    sentiment = rating_to_sentiment(rating)
 
     return ReviewResponse(text=text, rating=rating, sentiment=sentiment)
 
