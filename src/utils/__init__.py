@@ -7,12 +7,12 @@ __version__ = "2.0.0"
 __author__ = "Huy Pham"
 __email__ = "huypham0297@gmail.com"
 
-from .config import config
+from .config import load_config
 from .logger import setup_logging
 from .sentiment_mapper import rating_to_sentiment
 
 __all__ = [
-    "config", 
+    "load_config", 
     "setup_logging", 
     "rating_to_sentiment"
 ]

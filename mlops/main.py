@@ -2,7 +2,7 @@ import mlflow, os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from src.utils import load_config, setup_logging, rating_to_sentiment_numeric, sentiment_numeric_to_label
+from src.utils import load_config, setup_logging
 from src.data import DataLoader, Preprocessor
 from src.features import TFIDFExtractor
 from src.models import LogisticRegressionModel
@@ -35,12 +35,9 @@ def main(config_path: str = "config/config.yaml", feature_scaling: bool = False)
     preprocessor = Preprocessor()
     df["reviewText_clean"] = df["reviewText"].apply(preprocessor.preprocess) # Tokens
     texts_cleaned = df["reviewText_clean"].apply(lambda x: " ".join(x))      # Texts
-    # Convert ratings (1-5) to sentiment labels (0=Negative, 1=Neutral, 2=Positive)
-    labels = df["rating"].apply(rating_to_sentiment_numeric)
-    logger.info(f"Training on SENTIMENT labels (not ratings)")
+    labels = df["rating"]
+    logger.info("Training on SENTIMENT labels")
     logger.info(f"Sentiment distribution: {labels.value_counts().to_dict()}")
-
-    print(df["reviewText_clean"])
 
     # Split the data into training and test sets
     X_train, X_test, y_train, y_test = train_test_split(

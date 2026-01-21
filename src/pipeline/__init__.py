@@ -10,6 +10,6 @@ __email__ = "huypham0297@gmail.com"
 from .training import train
 from .prediction import predict
 from .evaluation import evaluate
-from .sentiment_pipeline import SentimentClassifier
+from .sentiment_pipeline import SentimentPipeline
 
-__all__ = ["train", "predict", "evaluate", "SentimentClassifier"]
+__all__ = ["train", "predict", "evaluate", "SentimentPipeline"]

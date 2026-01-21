@@ -10,7 +10,7 @@ __email__ = "huypham0297@gmail.com"
 from .data import DataLoader, Preprocessor
 from .features import BagOfWordsExtractor, TFIDFExtractor
 from .models import LogisticRegressionModel, NaiveBayesModel
-from .pipeline import train, predict, evaluate, SentimentClassifier
+from .pipeline import train, predict, evaluate, SentimentPipeline
 from .utils import load_config, setup_logging
 
 __all__ = [
