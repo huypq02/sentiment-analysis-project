@@ -26,12 +26,18 @@ class Preprocessor:
         # Lowercase and Punctuation Removal
         text = re.sub(r"[^\w\s\-]", " ", text).lower()
 
-        # Define English Stop word
-        en_stopwords = stopwords.words("english")
+        # Define English Stop word but exclude negation words (critical for sentiment)
+        en_stopwords = set(stopwords.words("english"))
+        # Remove negation words from stopwords - these are CRITICAL for sentiment
+        negation_words = {'not', 'no', 'never', 'neither', 'nobody', 'nothing', 
+                         'nowhere', 'nor', "don't", "doesn't", "didn't", "won't", 
+                         "wouldn't", "shouldn't", "can't", "couldn't", "isn't", 
+                         "aren't", "wasn't", "weren't", "hasn't", "haven't", "hadn't"}
+        en_stopwords = en_stopwords - negation_words
 
         # Tokenization
         tokens = word_tokenize(text)
 
-        # Remove the English stopwords
+        # Remove the English stopwords (but keep negations)
         tokens = [token for token in tokens if token not in en_stopwords]
         return tokens
