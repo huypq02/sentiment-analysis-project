@@ -33,10 +33,8 @@ def train(config_path="config/config.yaml", feature_scaling: bool = False):
         preprocessor = Preprocessor()
         df["reviewText_clean"] = df["reviewText"].apply(preprocessor.preprocess)
         # Convert df['reviewText_clean'] from tokens to string X
-        texts_cleaned = df["reviewText_clean"].apply(lambda x: " ".join(x))
-        
-        # Convert ratings (1-5) to sentiment labels (0=Negative, 1=Neutral, 2=Positive)
-        labels = df["rating"].apply(rating_to_sentiment_numeric)
+        texts_cleaned = df["reviewText_clean"].apply(lambda x: " ".join(x))        
+        labels = df["rating"]
         logger.info(f"Sentiment distribution: {labels.value_counts().to_dict()}")
 
         # 4. Split
