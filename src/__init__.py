@@ -23,7 +23,7 @@ __all__ = [
     "train",
     "predict",
     "evaluate",
-    "SentimentClassifier",
+    "SentimentPipeline",
     "load_config",
     "setup_logging",
 ]
