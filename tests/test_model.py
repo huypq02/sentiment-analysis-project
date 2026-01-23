@@ -39,12 +39,12 @@ class TestLogisticRegressionModel(unittest.TestCase):
         self.model.train(self.X_train, self.y_train)
         metrics = self.model.evaluate(self.X_test, self.y_test)
         self.assertIsInstance(metrics['accuracy'], float)
-        self.assertIsInstance(metrics['precision_macro'], float | np.ndarray)
-        self.assertIsInstance(metrics['recall_macro'], float | np.ndarray)
-        self.assertIsInstance(metrics['f1_macro'], float | np.ndarray)
-        self.assertIsInstance(metrics['f1_weighted'], float | np.ndarray)
+        self.assertIsInstance(metrics['precision_macro'], (float, np.ndarray))
+        self.assertIsInstance(metrics['recall_macro'], (float, np.ndarray))
+        self.assertIsInstance(metrics['f1_macro'], (float, np.ndarray))
+        self.assertIsInstance(metrics['f1_weighted'], (float, np.ndarray))
         self.assertIsInstance(metrics['confusion_matrix'], np.ndarray)
-        self.assertIsInstance(metrics['classification_report'], str | dict)
+        self.assertIsInstance(metrics['classification_report'], (str, dict))
 
 
 class TestNaiveBayesModel(unittest.TestCase):
