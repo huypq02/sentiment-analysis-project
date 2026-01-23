@@ -12,12 +12,13 @@ This project builds a robust sentiment classification system for product reviews
 2. [Project Structure](#project-structure)
 3. [Requirements](#requirements)
 4. [How It Works](#how-it-works)
-5. [API Usage (FastAPI)](#api-usage-fastapi)
-6. [Hands-On Roadmap](#hands-on-roadmap)
-7. [Theory & Best Practices](#theory--best-practices)
-8. [Evaluation & Metrics](#evaluation--metrics)
-9. [Deployment & MLOps](#deployment--mlops)
-10. [References & Further Study](#references--further-study)
+5. [Testing](#testing)
+6. [API Usage (FastAPI)](#api-usage-fastapi)
+7. [Hands-On Roadmap](#hands-on-roadmap)
+8. [Theory & Best Practices](#theory--best-practices)
+9. [Evaluation & Metrics](#evaluation--metrics)
+10. [Deployment & MLOps](#deployment--mlops)
+11. [References & Further Study](#references--further-study)
 
 ---
 
@@ -44,7 +45,7 @@ sentiment_analysis_project/
 │   ├── data/          # loaders, preprocessors
 │   ├── features/      # base & concrete feature extractors (Strategy Pattern)
 │   ├── models/        # base & concrete models (Strategy Pattern)
-│   ├── pipeline/      # context (SentimentClassifier), train/inference pipelines
+│   ├── pipeline/      # context (SentimentPipeline), train/inference pipelines
 │   ├── utils/         # metrics, visualization, logging
 │   └── app/           # FastAPI/Streamlit serving
 ├── tests/             # unit/integration tests
@@ -96,6 +97,88 @@ sentiment_analysis_project/
 
 ---
 
+## Testing
+
+The project includes comprehensive unit tests to ensure code quality and reliability. All tests are located in the `tests/` directory and use Python's built-in `unittest` framework.
+
+### Available Test Modules
+
+- **`test_preprocessor.py`** - Tests for text preprocessing and cleaning
+- **`test_feature_extractor.py`** - Tests for feature extraction strategies (TF-IDF, BoW, etc.)
+- **`test_model.py`** - Tests for model implementations and training
+- **`test_pipeline.py`** - Tests for end-to-end pipeline workflows
+
+### Running Tests
+
+#### Run All Tests
+
+```bash
+# Using unittest discovery (from project root)
+python -m unittest discover -s tests -p "test_*.py" -v
+
+# Or simply
+python -m unittest discover tests -v
+```
+
+#### Run Specific Test Files
+
+```bash
+# Test only the preprocessor
+python -m unittest tests.test_preprocessor -v
+
+# Test only feature extractors
+python -m unittest tests.test_feature_extractor -v
+
+# Test only models
+python -m unittest tests.test_model -v
+
+# Test only pipeline
+python -m unittest tests.test_pipeline -v
+```
+
+#### Run Specific Test Classes or Methods
+
+```bash
+# Run a specific test class
+python -m unittest tests.test_preprocessor.TestPreprocessor -v
+
+# Run a specific test method
+python -m unittest tests.test_preprocessor.TestPreprocessor.test_remove_punctuation -v
+```
+
+### Running Tests with Coverage
+
+```bash
+# Install coverage tool
+pip install coverage
+
+# Run tests with coverage
+coverage run -m unittest discover tests -v
+
+# View coverage report in terminal
+coverage report
+
+# Generate HTML coverage report
+coverage html
+```
+
+Open `htmlcov/index.html` in your browser to view the detailed coverage report.
+
+### Testing Best Practices
+
+1. **Run tests before committing:** Always run the full test suite before pushing code
+2. **Write tests for new features:** Add corresponding tests in `tests/` when adding new functionality
+3. **Check coverage:** Aim for >80% code coverage using the coverage tool
+4. **Use setUp/tearDown:** Leverage unittest's setUp and tearDown methods for reusable test fixtures
+5. **Test edge cases:** Include tests for invalid inputs, empty data, and boundary conditions
+6. **Follow naming conventions:** Test files should start with `test_`, test methods should start with `test_`
+
+### Continuous Integration
+
+Tests are automatically run on every push/PR via GitHub Actions. Check the `.github/workflows/` directory for CI configuration.
+
+---
+
 ## API Usage (FastAPI)
 
 The FastAPI service is implemented in `src/app/main.py` and runs on port **8080**.
@@ -114,7 +197,7 @@ The FastAPI service is implemented in `src/app/main.py` and runs on port **8080*
 - Example:
   - `curl http://localhost:8080/health`
 - Response:
-  - `{"status":"healthy","service":"Sentiment Analysis API","version":"1.0.0"}`
+  - `{"status":"healthy","service":"Sentiment Analysis API","version":"1.1.2"}`
 
 #### `POST /predict`
 
@@ -150,9 +233,10 @@ Request/response schemas are defined in `src/app/schemas.py`:
 | 2    | **Data**            | Explore/clean sample reviews in notebooks | `notebooks/01_data_exploration.ipynb`                                                                      |
 | 3    | **OOP Design**      | Implement base & concrete strategies      | `src/features/base_feature_extractor.py`, `src/models/model_interface.py`                                  |
 | 4    | **Modeling**        | Train/evaluate multiple classifiers       | `src/pipeline/train_pipeline.py`                                                                           |
-| 5    | **Metrics**         | Visualize confusion matrix, F1, etc.      | `src/utils/metrics.py`                                                                                     |
-| 6    | **Deployment**      | Serve model via API/UI                    | `src/app/`                                                                                                 |
-| 7    | **Experimentation** | Swap strategies, tune hyperparameters     | `config/`                                                                                                  |
+| 5    | **Testing**         | Run unit tests to verify implementation   | `python -m unittest discover tests -v` (see [Testing](#testing) section)                                   |
+| 6    | **Metrics**         | Visualize confusion matrix, F1, etc.      | `src/utils/metrics.py`                                                                                     |
+| 7    | **Deployment**      | Serve model via API/UI                    | `src/app/`                                                                                                 |
+| 8    | **Experimentation** | Swap strategies, tune hyperparameters     | `config/`                                                                                                  |
 
 ---
 
