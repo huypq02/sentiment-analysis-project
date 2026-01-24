@@ -1,5 +1,5 @@
 from sklearn.preprocessing import StandardScaler
-from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import (
     confusion_matrix, 
     accuracy_score, 
@@ -17,7 +17,7 @@ class NaiveBayesModel(SentimentModel):
             params: dict = {}
     ):
         """Initialize the Naive Bayes model and Standard scaler."""
-        self.classifier = GaussianNB(**params)
+        self.classifier = MultinomialNB(**params)
         self.scaler = StandardScaler(
             with_mean=False
         )  # with_mean=False works with the sparse matrix (mostly zeros)
