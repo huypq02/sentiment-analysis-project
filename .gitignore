@@ -46,3 +46,7 @@ tests/*.log
 .coverage.*
 htmlcov/
 *.cover
+
+# Experiments and scratch files
+experiments/
+scratch/

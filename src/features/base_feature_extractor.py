@@ -6,15 +6,30 @@ class BaseFeatureExtractor(ABC):
 
     @abstractmethod
     def fit(self, sentences):
-        """Fit the extractor on training texts."""
+        """
+        Fit the extractor on training texts.
+        
+        Args:
+            sentences: List of text documents.
+        """
         pass
 
     @abstractmethod
     def transform(self, sentences):
-        """Transform text into numerical representations."""
+        """
+        Transform text into numerical representations.
+        
+        Args:
+            sentences: List of text documents.
+        """
         pass
 
     def fit_transform(self, sentences):
-        """Fit the extractor and transform text into numerical representations."""
+        """
+        Fit the extractor and transform text into numerical representations.
+        
+        Args:
+            sentences: List of text documents.
+        """
         self.fit(sentences)
         return self.transform(sentences)

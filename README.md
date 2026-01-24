@@ -197,7 +197,7 @@ The FastAPI service is implemented in `src/app/main.py` and runs on port **8080*
 - Example:
   - `curl http://localhost:8080/health`
 - Response:
-  - `{"status":"healthy","service":"Sentiment Analysis API","version":"1.1.2"}`
+  - `{"status":"healthy","service":"Sentiment Analysis API","version":"1.2.0"}`
 
 #### `POST /predict`
 

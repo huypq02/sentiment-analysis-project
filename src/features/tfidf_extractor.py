@@ -3,7 +3,14 @@ from .base_feature_extractor import BaseFeatureExtractor
 
 
 class TFIDFExtractor(BaseFeatureExtractor):
-    def __init__(self, max_features=5000, ngram_range=(1, 2), min_df=2, max_df=0.9):
+    def __init__(
+            self, 
+            max_features=5000, 
+            ngram_range=(1, 2), 
+            min_df=2, 
+            max_df=0.9,
+            **vectorizer_kwargs
+    ):
         """Initialize the vectorizer for an extractor.
         
         Args:
@@ -11,19 +18,32 @@ class TFIDFExtractor(BaseFeatureExtractor):
             ngram_range: Range of n-grams to extract (default: (1,2) for unigrams and bigrams)
             min_df: Ignore terms appearing in fewer documents (default: 2)
             max_df: Ignore terms appearing in more than this proportion of docs (default: 0.9)
+            sublinear_tf: Sublinear tf scaling for term frequency
+            **vectorizer_kwargs: Additional keyword arguments for TfidfVectorizer.
         """
         self.vectorizer = TfidfVectorizer(
             max_features=max_features,
             ngram_range=ngram_range,  # Capture phrases like "not bad", "very good"
             min_df=min_df,            # Remove very rare words
             max_df=max_df,            # Remove very common words
-            sublinear_tf=True         # Use logarithmic scaling for term frequency
+            sublinear_tf=True,        # Use logarithmic scaling for term frequency
+            **vectorizer_kwargs
         )
 
     def fit(self, sentences):
-        """Fit the extractor on training texts using TF-IDF."""
+        """
+        Fit the extractor on training texts using TF-IDF.
+
+        Args:
+            sentences: List of text documents to fit the vectorizer on.
+        """
         self.vectorizer.fit(sentences)
 
     def transform(self, sentences):
-        """Transform text into numerical representations after vectorization."""
+        """
+        Transform text into numerical representations after vectorization.
+        
+        Args:
+            sentences: List of text documents to transform.
+        """
         return self.vectorizer.transform(sentences)

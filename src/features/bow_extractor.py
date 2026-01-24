@@ -4,40 +4,48 @@ from .base_feature_extractor import BaseFeatureExtractor
 
 class BagOfWordsExtractor(BaseFeatureExtractor):
     def __init__(
-        self,
-        max_features=None,
-        min_df=1,
-        max_df=1.0,
-        stop_words=None,
-        **vectorizer_kwargs
+            self,
+            max_features=5000,
+            min_df=2,
+            max_df=0.8,
+            ngram_range=(1,2),
+            binary=True,
+            **vectorizer_kwargs
     ):
         """
         Initialize BagOfWordsExtractor with customizable parameters.
 
         Args:
-            max_features (int or None): Maximum number of features to extract. None means unlimited.
+            max_features (int or None): Maximum number of features to extract.
+            ngram_range: Range of n-grams to extract (default: (1,2) for unigrams and bigrams).
             min_df (int or float): Ignore terms that appear in fewer than min_df documents.
             max_df (int or float): Ignore terms that appear in more than max_df proportion of documents.
-            stop_words (str, list, or None): Stop words to remove. None means do not remove stop words.
+            binary: Binary BoW captures presence, not frequency, which aligns better with sentiment signals.
             **vectorizer_kwargs: Additional keyword arguments for CountVectorizer.
-
-        By default:
-            - Uses all features (max_features=None).
-            - Removes words that appear in fewer than 1 document (min_df=1) or more than 100% of documents (max_df=1.0).
-            - Does not ignore stopwords (stop_words=None).
         """
         self.vectorizer = CountVectorizer(
             max_features=max_features,
+            ngram_range=ngram_range,
             min_df=min_df,
             max_df=max_df,
-            stop_words=stop_words,
+            binary=binary,
             **vectorizer_kwargs
         )
 
     def fit(self, sentences):
-        """Fit the Bag-of-Words extractor on training texts."""
+        """
+        Fit the Bag-of-Words extractor on training texts.
+
+        Args:
+            sentences: List of text documents to fit the vectorizer on.
+        """
         self.vectorizer.fit(sentences)
 
     def transform(self, sentences):
-        """Transform text into numerical representations."""
+        """
+        Transform text into numerical representations.
+        
+        Args:
+            sentences: List of text documents to transform.
+        """
         return self.vectorizer.transform(sentences)
