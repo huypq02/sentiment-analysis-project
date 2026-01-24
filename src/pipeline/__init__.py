@@ -3,7 +3,7 @@ Module to initialize the package for src.pipeline
 Provides the imports at the package-level.
 """
 
-__version__ = "1.1.2"
+__version__ = "1.2.0"
 __author__ = "Huy Pham"
 __email__ = "huypham0297@gmail.com"
 

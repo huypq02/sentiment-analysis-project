@@ -12,7 +12,7 @@ def health_check():
     return {
         "status": "healthy",
         "service": "Sentiment Analysis API",
-        "version": "1.1.2",
+        "version": "1.2.0",
     }
 
 
