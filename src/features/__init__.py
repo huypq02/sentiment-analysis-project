@@ -10,5 +10,11 @@ __email__ = "huypham0297@gmail.com"
 from .base_feature_extractor import BaseFeatureExtractor
 from .bow_extractor import BagOfWordsExtractor
 from .tfidf_extractor import TFIDFExtractor
+from .factory import ExtractorFactory
 
-__all__ = ["BaseFeatureExtractor", "BagOfWordsExtractor", "TFIDFExtractor"]
+__all__ = [
+    "BaseFeatureExtractor", 
+    "BagOfWordsExtractor", 
+    "TFIDFExtractor", 
+    "ExtractorFactory"
+]

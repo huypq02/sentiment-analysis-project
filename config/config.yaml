@@ -1,6 +1,6 @@
-file:
+dataset:
   raw_dir: "data/raw"
-  name: "book_reviews_sample.csv"
+  file: "book_reviews_sample.csv"
 models:
   dir: "models"
   model: "models/sentiment_logreg.pkl"
