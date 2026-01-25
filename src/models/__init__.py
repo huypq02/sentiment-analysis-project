@@ -10,5 +10,11 @@ __email__ = "huypham0297@gmail.com"
 from .model_interface import SentimentModel
 from .logreg_model import LogisticRegressionModel
 from .naive_bayes_model import NaiveBayesModel
+from .factory import ModelFactory
 
-__all__ = ["SentimentModel", "LogisticRegressionModel", "NaiveBayesModel"]
+__all__ = [
+    "SentimentModel", 
+    "LogisticRegressionModel", 
+    "NaiveBayesModel", 
+    "ModelFactory"
+]

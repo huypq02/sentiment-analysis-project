@@ -23,7 +23,7 @@ def main(config_path: str = "config/config.yaml", feature_scaling: bool = False)
     if config is None:
         logger.error("Failed to load configuration. Exiting.")
         raise RuntimeError("Failed to load configuration.")
-    filename = os.path.join(config["file"]["raw_dir"], config["file"]["name"])
+    filename = os.path.join(config["dataset"]["raw_dir"], config["dataset"]["file"])
 
     # Load the dataset
     logger.info("Loading data ...")

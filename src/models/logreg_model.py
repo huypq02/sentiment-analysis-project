@@ -12,12 +12,17 @@ from .model_interface import SentimentModel
 
 
 class LogisticRegressionModel(SentimentModel):
-    def __init__(self, param: dict = {"random_state": 0}):
+    def __init__(
+            self, 
+            params: dict = {
+                "random_state": 0
+            }
+    ):
         """Initialize the Logistic Regression and Standard scaler."""
-        self.classifier = LogisticRegression(**param)
+        self.classifier = LogisticRegression(**params)
         self.scaler = StandardScaler(
             with_mean=False
-        )  # with_mean=False works with the sparse matrix
+        )  # with_mean=False works with the sparse matrix (mostly zeros)
 
     def scale_feature(self, data, test_data):
         """Feature scaling the provided features.

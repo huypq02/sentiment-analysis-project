@@ -1,14 +1,26 @@
 from sklearn.preprocessing import StandardScaler
-from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import (
+    confusion_matrix, 
+    accuracy_score, 
+    precision_score, 
+    recall_score, 
+    f1_score,
+    classification_report
+)
 from .model_interface import SentimentModel
 
 
 class NaiveBayesModel(SentimentModel):
-    def __init__(self):
+    def __init__(
+            self,
+            params: dict = {}
+    ):
         """Initialize the Naive Bayes model and Standard scaler."""
-        self.classifier = GaussianNB()
-        self.scaler = StandardScaler()
+        self.classifier = MultinomialNB(**params)
+        self.scaler = StandardScaler(
+            with_mean=False
+        )  # with_mean=False works with the sparse matrix (mostly zeros)
 
     def scale_feature(self, data, test_data):
         """Feature scaling the provided features.
@@ -29,6 +41,15 @@ class NaiveBayesModel(SentimentModel):
     def evaluate(self, test_data, test_labels):
         """Evaluate Naive Bayes model"""
         y_pred = self.classifier.predict(test_data)
-        cm = confusion_matrix(test_labels, y_pred)  # Confusion matrix
-        accuracy = accuracy_score(test_labels, y_pred)  # Accuracy score
-        return cm, accuracy
+        
+        return {
+            'confusion_matrix': confusion_matrix(test_labels, y_pred),
+            'accuracy': accuracy_score(test_labels, y_pred),
+            'precision_macro': precision_score(test_labels, y_pred, average='macro', zero_division=0),
+            'recall_macro': recall_score(test_labels, y_pred, average='macro', zero_division=0),
+            'f1_macro': f1_score(test_labels, y_pred, average='macro', zero_division=0),
+            'precision_weighted': precision_score(test_labels, y_pred, average='weighted', zero_division=0),
+            'recall_weighted': recall_score(test_labels, y_pred, average='weighted', zero_division=0),
+            'f1_weighted': f1_score(test_labels, y_pred, average='weighted', zero_division=0),
+            'classification_report': classification_report(test_labels, y_pred, zero_division=0)
+        }
