@@ -8,6 +8,9 @@ class TestPreprocessor(unittest.TestCase):
         preprocessor = Preprocessor()
         self.assertEqual(
             preprocessor.preprocess("You SHOULD TAKE this course!"), ["take", "course"]
+        )        
+        self.assertEqual(
+            preprocessor.preprocess("The books are not bad!"), ["books", "not", "bad"]
         )
 
 
