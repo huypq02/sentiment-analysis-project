@@ -1,20 +1,25 @@
+from typing import Optional
 from . import LogisticRegressionModel, NaiveBayesModel
 
 class ModelFactory():
     @staticmethod
-    def create_model(model_name: str):
+    def create_model(model_name: str, params: Optional[dict]):
         """Create a model."""
         if model_name == "logreg":
-            return LogisticRegressionModel({
-                'random_state': 0,
-                'max_iter': 1000,
-                'class_weight': 'balanced'  # Handle class imbalance
-            })
+            if params is None:
+                params = {
+                    'random_state': 0,
+                    'max_iter': 1000,
+                    'class_weight': 'balanced'  # Handle class imbalance
+                }
+            return LogisticRegressionModel(params)
         elif model_name == "naive_bayes":
-            return NaiveBayesModel({
-                'alpha': 1.0,           # Smoothing (0=no smoothing, 1=Laplace, higher=more smoothing)
-                'fit_prior': True,
-                'class_prior': None
-            })
+            if params is None:
+                params = {
+                    'alpha': 1.0,           # Smoothing (0=no smoothing, 1=Laplace, higher=more smoothing)
+                    'fit_prior': True,
+                    'class_prior': None
+                }
+            return NaiveBayesModel(params)
         else:
             raise ValueError(f"Unknown model name: {model_name}")
