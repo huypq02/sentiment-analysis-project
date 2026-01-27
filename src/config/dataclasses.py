@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
+from .constants import DEFAULT_CONFIG_PATH
 
 
 @dataclass
@@ -63,7 +64,7 @@ class FilePaths:
         config_path (str): Path to the main configuration YAML file. Default is 'config/config.yaml'.
         save_dir (Optional[str]): Directory to save outputs, models, or results.
     """
-    config_path: str = "config/config.yaml"
+    config_path: str = DEFAULT_CONFIG_PATH
     save_dir: Optional[str] = None
 
 @dataclass

@@ -26,11 +26,25 @@ def train(
         file_paths: FilePaths,
         mlflow_tracking: MLFlowTracking,
 ):
-    """The training pipeline on the model"""
+    """
+    The training pipeline on the model.
+
+    Args:
+        data_params (DataParameters): Parameters related to data loading and columns.
+        component_sel (ComponentSelection): Selection of feature extractor and model.
+        hyperparams (Hyperparameters): Hyperparameters for extractor and model.
+        training_conf (TrainingConfiguration): Training configuration such as test size, random state, and feature scaling.
+        file_paths (FilePaths): File paths for configuration, models, and other artifacts.
+        mlflow_tracking (MLFlowTracking): MLflow tracking configuration for experiment logging.
+
+    Returns:
+        tuple: (model, extractor, feature_test_scaled, y_test, config)
+    """
 
     # 1. Load config
     logger.info("Loading configuration...")
-    config = load_config(file_paths.config_path)
+    config_path: str = os.environ.get("CONFIG_PATH", file_paths.config_path)
+    config = load_config(config_path)
     if config is None:
         logger.error("Failed to load configuration. Exiting.")
         raise RuntimeError("Failed to load configuration.")
@@ -90,7 +104,7 @@ def train(
 
     except Exception as e:
         logger.exception(f"Unexpected error in training pipeline: {e}")
-        return None
+        return RuntimeError("Training pipeline failed")
 
     # 7. Save model and feature extractor
     # Create new folder with the name 'models' if it doesn't exist
