@@ -1,19 +1,35 @@
+import os
 from .training import train
-from src.utils import setup_logging
+from src.utils import load_config, setup_logging
+from src.config import DEFAULT_CONFIG_PATH
 
 logger = setup_logging(__name__)
 
 
-def evaluate(model=None, y_test=None, config=None):
-    """Evaluate model performance (accuracy, f1, confusion matrix...)."""
+def evaluate(
+        evaluate_model, 
+        feature_test, 
+        label_test
+):
+    """
+    Evaluate model performance (accuracy, f1, confusion matrix...).
+
+    Args:
+        model: Trained model object with an evaluate method.
+        feature_test: Test feature matrix (vectorized/scaled).
+        label_test: True labels for the test set.
+        config_path (str, optional): Path to configuration YAML file. Defaults to "config/config.yaml".
+
+    Returns:
+        dict: Dictionary containing evaluation metrics (accuracy, precision, recall, f1, confusion matrix, classification report).
+    """
 
     try:
-        if model is None:
-            # 1-7 Implement the extractor features and model
-            model, _, feature_test_scaled, y_test, config = train()
-
+        config_path: str = os.environ.get("CONFIG_PATH", DEFAULT_CONFIG_PATH)
+        config = load_config(config_path)
         # 8. Evaluation
-        metrics = model.evaluate(feature_test_scaled, y_test)
+        logger.info("Evaluating...")
+        metrics = evaluate_model.evaluate(feature_test, label_test)
 
         # 9. Log results
         with open(config["models"]["metrics"], "w") as f:
@@ -36,8 +52,44 @@ def evaluate(model=None, y_test=None, config=None):
 
     except Exception as e:
         logger.exception(f"Unexpected error in evaluation: {e}")
-        return None
+        return RuntimeError("Evaluation failed")
 
 
 if __name__ == "__main__":
-    evaluate()
+    from src.config import (
+    DataParameters, 
+    ComponentSelection,
+    Hyperparameters,
+    TrainingConfiguration,
+    FilePaths,
+    MLFlowTracking
+    )
+
+    model, _, feature_test, label_test, _ = train(
+        data_params=DataParameters(),
+        component_sel=ComponentSelection(),
+        hyperparams=Hyperparameters(
+            extractor_params={
+                "max_features": 5000,
+                "ngram_range": (1, 2),  # Unigrams + bigrams to capture phrases like "not bad"
+                "min_df": 2,
+                "max_df": 0.9
+            },
+            model_params={
+                "solver": "lbfgs",
+                "max_iter": 1000,
+                "random_state": 8888,
+                "C": 1.0,  # Regularization strength (smaller = stronger regularization)
+                "class_weight": "balanced",  # Handle class imbalance automatically
+            }
+        ),
+        training_conf=TrainingConfiguration(),
+        file_paths=FilePaths(),
+        mlflow_tracking=MLFlowTracking()
+    )
+    
+    evaluate(
+        evaluate_model=model,
+        feature_test=feature_test,
+        label_test=label_test
+    )

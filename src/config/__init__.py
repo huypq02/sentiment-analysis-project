@@ -3,11 +3,7 @@ Module to initialize the main src.config package
 Provides the imports at the package-level.
 """
 
-__version__ = "1.2.0"
-__author__ = "Huy Pham"
-__email__ = "huypham0297@gmail.com"
-
-from .config import (
+from .dataclasses import (
     DataParameters, 
     ComponentSelection,
     Hyperparameters,
@@ -15,6 +11,18 @@ from .config import (
     FilePaths,
     MLFlowTracking
 )
+from .constants import (
+    API_VERSION,
+    SERVICE_NAME,
+    AUTHOR_NAME,
+    AUTHOR_EMAIL,
+    HEALTHY_STATUS,
+    DEFAULT_CONFIG_PATH
+)
+
+__version__ = API_VERSION
+__author__ = AUTHOR_NAME
+__email__ = AUTHOR_EMAIL
 
 __all__ = [
     "DataParameters", 
@@ -22,5 +30,11 @@ __all__ = [
     "Hyperparameters",
     "TrainingConfiguration",
     "FilePaths",
-    "MLFlowTracking"
+    "MLFlowTracking",
+    "API_VERSION",
+    "SERVICE_NAME",
+    "AUTHOR_NAME",
+    "AUTHOR_EMAIL",
+    "HEALTHY_STATUS",
+    "DEFAULT_CONFIG_PATH"
 ]

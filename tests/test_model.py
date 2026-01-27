@@ -20,14 +20,6 @@ class TestLogisticRegressionModel(unittest.TestCase):
         self.assertTrue(hasattr(self.model.classifier, "coef_"))
         self.assertTrue(hasattr(self.model.classifier, "classes_"))
 
-    def test_scale_feature(self):
-        """Unit test for feature scaling."""
-        scaled_feature_train, scaled_feature_test = self.model.scale_feature(
-            self.X_train, self.X_test
-        )
-        self.assertEqual(scaled_feature_train.shape, self.X_train.shape)
-        self.assertEqual(scaled_feature_test.shape, self.X_test.shape)
-
     def test_predict(self):
         """Unit test for making predictions."""
         self.model.train(self.X_train, self.y_train)
@@ -45,6 +37,14 @@ class TestLogisticRegressionModel(unittest.TestCase):
         self.assertIsInstance(metrics['f1_weighted'], (float, np.ndarray))
         self.assertIsInstance(metrics['confusion_matrix'], np.ndarray)
         self.assertIsInstance(metrics['classification_report'], (str, dict))
+    
+    def test_scale_feature(self):
+        """Unit test for feature scaling."""
+        scaled_feature_train, scaled_feature_test = self.model.scale_feature(
+            self.X_train, self.X_test
+        )
+        self.assertEqual(scaled_feature_train.shape, self.X_train.shape)
+        self.assertEqual(scaled_feature_test.shape, self.X_test.shape)
 
 
 class TestNaiveBayesModel(unittest.TestCase):
@@ -63,14 +63,6 @@ class TestNaiveBayesModel(unittest.TestCase):
         self.model.train(self.X_train, self.y_train)
         self.assertTrue(hasattr(self.model.classifier, "class_count_"))
         self.assertTrue(hasattr(self.model.classifier, "classes_"))
-
-    def test_scale_feature(self):
-        """Unit test for feature scaling."""
-        scaled_feature_train, scaled_feature_test = self.model.scale_feature(
-            self.X_train, self.X_test
-        )
-        self.assertEqual(scaled_feature_train.shape, self.X_train.shape)
-        self.assertEqual(scaled_feature_test.shape, self.X_test.shape)
 
     def test_predict(self):
         """Unit test for making predictions."""

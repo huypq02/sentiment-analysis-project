@@ -24,34 +24,32 @@ class LogisticRegressionModel(SentimentModel):
             with_mean=False
         )  # with_mean=False works with the sparse matrix (mostly zeros)
 
-    def scale_feature(self, data, test_data):
-        """Feature scaling the provided features.
-        This method does NOT modify the input arrays in-place.
-        Returns scaled copies of the input data and test_data."""
-        data = self.scaler.fit_transform(data)
-        test_data = self.scaler.transform(test_data)
-        return data, test_data
+    def scale_feature(self, features, feature_test):
+        """Feature scaling the provided features."""
+        features = self.scaler.fit_transform(features)
+        feature_test = self.scaler.transform(feature_test)
+        return features, feature_test
 
-    def train(self, data, labels):
+    def train(self, features, labels):
         """Train Logistic Regression model"""
-        self.classifier.fit(data, labels)
+        self.classifier.fit(features, labels)
 
-    def predict(self, test_data):
+    def predict(self, feature_test):
         """Make predictions"""
-        return self.classifier.predict(test_data)
+        return self.classifier.predict(feature_test)
 
-    def evaluate(self, test_data, test_labels):
+    def evaluate(self, feature_test, label_test):
         """Evaluate Logistic Regression model with comprehensive metrics"""
-        y_pred = self.classifier.predict(test_data)
+        y_pred = self.classifier.predict(feature_test)
         
         return {
-            'confusion_matrix': confusion_matrix(test_labels, y_pred),
-            'accuracy': accuracy_score(test_labels, y_pred),
-            'precision_macro': precision_score(test_labels, y_pred, average='macro', zero_division=0),
-            'recall_macro': recall_score(test_labels, y_pred, average='macro', zero_division=0),
-            'f1_macro': f1_score(test_labels, y_pred, average='macro', zero_division=0),
-            'precision_weighted': precision_score(test_labels, y_pred, average='weighted', zero_division=0),
-            'recall_weighted': recall_score(test_labels, y_pred, average='weighted', zero_division=0),
-            'f1_weighted': f1_score(test_labels, y_pred, average='weighted', zero_division=0),
-            'classification_report': classification_report(test_labels, y_pred, zero_division=0)
+            'confusion_matrix': confusion_matrix(label_test, y_pred),
+            'accuracy': accuracy_score(label_test, y_pred),
+            'precision_macro': precision_score(label_test, y_pred, average='macro', zero_division=0),
+            'recall_macro': recall_score(label_test, y_pred, average='macro', zero_division=0),
+            'f1_macro': f1_score(label_test, y_pred, average='macro', zero_division=0),
+            'precision_weighted': precision_score(label_test, y_pred, average='weighted', zero_division=0),
+            'recall_weighted': recall_score(label_test, y_pred, average='weighted', zero_division=0),
+            'f1_weighted': f1_score(label_test, y_pred, average='weighted', zero_division=0),
+            'classification_report': classification_report(label_test, y_pred, zero_division=0)
         }
