@@ -126,7 +126,7 @@ if __name__ == "__main__":
             extractor_params={
                 "max_features": 5000,
                 "ngram_range": (1, 2),  # Unigrams + bigrams to capture phrases like "not bad"
-                "min_df": 2,
+                "min_df": 1,
                 "max_df": 0.9
             },
             model_params={
