@@ -7,18 +7,18 @@ class TFIDFExtractor(BaseFeatureExtractor):
             self, 
             max_features=5000, 
             ngram_range=(1, 2), 
-            min_df=2, 
+            min_df=1, 
             max_df=0.9,
             **vectorizer_kwargs
     ):
         """Initialize the vectorizer for an extractor.
         
         Args:
-            max_features: Maximum number of features (default: 5000)
-            ngram_range: Range of n-grams to extract (default: (1,2) for unigrams and bigrams)
-            min_df: Ignore terms appearing in fewer documents (default: 2)
-            max_df: Ignore terms appearing in more than this proportion of docs (default: 0.9)
-            sublinear_tf: Sublinear tf scaling for term frequency
+            max_features: Maximum number of features (default: 5000).
+            ngram_range: Range of n-grams to extract (default: (1,2) for unigrams and bigrams).
+            min_df: Ignore terms appearing in fewer documents (default: 1).
+            max_df: Ignore terms appearing in more than this proportion of docs (default: 0.9).
+            sublinear_tf: Sublinear tf scaling for term frequency (default: True).
             **vectorizer_kwargs: Additional keyword arguments for TfidfVectorizer.
         """
         self.vectorizer = TfidfVectorizer(

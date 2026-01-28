@@ -13,7 +13,9 @@ from .config import (
     API_VERSION,
     SERVICE_NAME,
     AUTHOR_NAME,
-    AUTHOR_EMAIL
+    AUTHOR_EMAIL,
+    HEALTHY_STATUS,
+    DEFAULT_CONFIG_PATH
 )
 from .data import DataLoader, Preprocessor
 from .features import BagOfWordsExtractor, TFIDFExtractor, ExtractorFactory
@@ -49,5 +51,7 @@ __all__ = [
     "API_VERSION",
     "SERVICE_NAME",
     "AUTHOR_NAME",
-    "AUTHOR_EMAIL"
+    "AUTHOR_EMAIL",
+    "HEALTHY_STATUS",
+    "DEFAULT_CONFIG_PATH"
 ]
