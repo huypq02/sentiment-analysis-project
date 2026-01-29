@@ -81,4 +81,4 @@ class MLFlowTracking:
     mlflow_tracking: bool = True
     experiment_name: str = "sentiment-analysis"
     run_name: Optional[str] = None
-    tags: Optional[str] = None
+    tags: Optional[dict] = None
