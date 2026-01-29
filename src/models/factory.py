@@ -4,7 +4,19 @@ from . import LogisticRegressionModel, NaiveBayesModel
 class ModelFactory():
     @staticmethod
     def create_model(model_name: str, params: Optional[dict]):
-        """Create a model."""
+        """
+        Create a model.
+
+        Args:
+            model_name (str): The name of the model to create. Supported values are 'logreg' and 'naive_bayes'.
+            params (Optional[dict]): Parameters to initialize the model. If None, default parameters are used.
+
+        Returns:
+            An instance of the specified model.
+
+        Raises:
+            ValueError: If an unknown model_name is provided.
+        """
         if model_name == "logreg":
             if params is None:
                 params = {

@@ -4,7 +4,19 @@ from . import TFIDFExtractor, BagOfWordsExtractor
 class ExtractorFactory:
     @staticmethod
     def create_extractor(extractor_name: str, params: Optional[dict]):
-        """Create a feature extractor."""
+        """
+        Create a feature extractor.
+
+        Args:
+            extractor_name (str): The name of the extractor to create. Supported values are 'tfidf' and 'bow'.
+            params (Optional[dict]): Parameters to initialize the extractor. If None, default parameters are used.
+
+        Returns:
+            An instance of the specified feature extractor.
+
+        Raises:
+            ValueError: If an unknown extractor_name is provided.
+        """
         if extractor_name == "tfidf":
             if params is None:
                 params = {
