@@ -1,12 +1,12 @@
 # Sentiment Analysis of Product Reviews
 
-> **A production-grade ML system demonstrating scalable architecture, clean code, and real-world ML engineering practices.**
+> **A production-grade ML system built end-to-end to show how I’d ship a real sentiment classifier.**
 
 ## Overview
 
-Built a sentiment classifier for product reviews from the ground up-handling the full ML lifecycle from data ingestion to API deployment. The system uses a **modular, strategy-based architecture** that lets you swap models and feature extractors without touching the pipeline. Think of it as building Lego blocks instead of a monolith: each component is independent, testable, and replaceable.
+I built this as a full pipeline, not a notebook demo. It loads real review data, cleans it, extracts features, trains a model, and serves predictions over an API. The core idea is simple: every piece is a swap-in component (feature extractors, models, and pipelines), so I can compare approaches without rewriting the system.
 
-This isn't a toy notebook project-it's structured for a real team to collaborate on, extend, and deploy confidently.
+It’s structured the way I build production ML: configuration-driven, testable, and easy to extend. I wanted this to feel like a repo you could hand to another engineer and they’d be productive immediately.
 
 ## Quick Start
 
@@ -22,38 +22,30 @@ uvicorn src.app.main:app --host 0.0.0.0 --port 8080
 
 # Try a prediction
 curl -X POST http://localhost:8080/predict \
-  -H "Content-Type: application/json" \
-  -d '{"text":"This product exceeded my expectations!"}'
+    -H "Content-Type: application/json" \
+    -d '{"text":"This product exceeded my expectations!"}'
 ```
 
 ## Table of Contents
 
-1. [What Makes This Different](#what-makes-this-different)
+1. [Why It’s Built This Way](#why-its-built-this-way)
 2. [Project Structure](#project-structure)
-3. [The Architecture](#the-architecture)
-4. [How It Works](#how-it-works)
-5. [Testing & Quality](#testing--quality)
+3. [Architecture Notes](#architecture-notes)
+4. [How the Pipeline Runs](#how-the-pipeline-runs)
+5. [Testing](#testing)
 6. [API Usage](#api-usage)
 7. [Getting Started](#getting-started)
-8. [Key Design Decisions](#key-design-decisions)
+8. [Design Decisions](#design-decisions)
 9. [Performance & Metrics](#performance--metrics)
 10. [Deployment](#deployment)
 
 ---
 
-## What Makes This Different
+## Why It’s Built This Way
 
-**Strategy Pattern in Action**: Instead of hardcoding models and feature extractors, this project treats them as pluggable strategies. Want to compare Naive Bayes vs. Logistic Regression? Swap one config line. Need to upgrade from TF-IDF to word embeddings? Add a new extractor class without touching existing code.
-
-**Production-Grade Structure**: Unlike tutorial projects, this follows real ML engineering practices:
-
-- Centralized configuration management
-- Comprehensive unit tests (>80% coverage)
-- Separated concerns: data, features, models, pipelines
-- CI/CD pipeline with automated testing
-- API-ready with request/response schemas
-
-**Built for Teams**: Clear separation of responsibilities means data scientists, ML engineers, and backend engineers can work in parallel without stepping on each other's toes.
+- **Strategy pattern everywhere**: I don’t want to touch pipeline code when I swap TF‑IDF for BoW or Logistic Regression for Naive Bayes. That swap happens in config and the rest of the system stays put.
+- **Real structure, not a tutorial**: There’s a clean separation between data, features, models, pipelines, and API. It keeps the codebase stable as it grows.
+- **Tests that actually help**: I added unit tests early because I refactor a lot when experimenting. The tests keep the surface area honest.
 
 ---
 
@@ -75,7 +67,7 @@ sentiment-analysis-project/
 │   │   ├── naive_bayes_model.py       # Bernoulli NB classifier
 │   │   └── logreg_model.py            # Logistic Regression classifier
 │   ├── pipeline/
-│   │   ├── sentiment_classifier.py    # Main orchestrator (context)
+│   │   ├── sentiment_classifier.py    # Main orchestrator
 │   │   ├── train_pipeline.py          # Training workflow
 │   │   ├── predict_pipeline.py        # Inference workflow
 │   │   └── evaluation.py              # Metrics & validation
@@ -110,89 +102,54 @@ sentiment-analysis-project/
 
 ---
 
-## The Architecture
+## Architecture Notes
 
-### Design Pattern: Strategy
-
-The **Strategy Pattern** is the backbone of this project. Here's why it matters:
+I went with a Strategy pattern because I want to compare ideas quickly:
 
 ```python
-# Before: Monolithic, rigid
-if model_type == "naive_bayes":
-    model = NaiveBayesClassifier()
-elif model_type == "logistic_regression":
-    model = LogisticRegressionClassifier()
-# ... painful to extend
-
-# After: Plug-and-play strategies
+# Strategy-style wiring
 feature_strategy = TFIDFExtractor()  # or BOWExtractor()
 model_strategy = LogisticRegression()  # or NaiveBayes()
 classifier = SentimentClassifier(feature_strategy, model_strategy)
-# Change one line, not the whole pipeline
 ```
 
-### Key Components
-
-| Component              | Purpose                                                  | Extensibility                                           |
-| ---------------------- | -------------------------------------------------------- | ------------------------------------------------------- |
-| **Feature Extractors** | Convert text → numerical vectors                         | Add new extractors by inheriting `BaseFeatureExtractor` |
-| **Models**             | Classify sentiments                                      | Add new classifiers by inheriting `ModelInterface`      |
-| **Pipeline**           | Orchestrate: load → preprocess → extract → train/predict | Modify workflow logic without changing strategies       |
-| **API Layer**          | Expose predictions via HTTP                              | FastAPI handles requests, schema validation             |
+It’s intentionally boring. The goal is for each layer to do one thing well and stay replaceable.
 
 ### Tech Stack
 
-- **Python 3.8+** for core ML
-- **scikit-learn** for models & feature engineering
-- **FastAPI** for REST API
-- **unittest** for testing, coverage tool for metrics
-- **YAML** for configuration management
-- **Docker** for containerization & deployment
+- **Python 3.8+**
+- **scikit-learn**
+- **FastAPI**
+- **unittest**
+- **YAML**
+- **Docker**
 
 ---
 
-## How It Works
-
-The pipeline flows through distinct, testable stages:
+## How the Pipeline Runs
 
 ```
 [Raw Reviews] → [Preprocess] → [Feature Extract] → [Model] → [Predict]
-    ↓              ↓              ↓               ↓        ↓
-   CSV         Tokenize,      TF-IDF or        Train    REST API
-              Remove Stop      Bag-of-Words   Classifier  Output
-              Words
+        ↓              ↓              ↓               ↓        ↓
+     CSV         Tokenize,      TF-IDF or        Train    REST API
+                            Remove Stop      Bag-of-Words   Classifier  Output
+                            Words
 ```
 
-### In Detail
+### Stages
 
-1. **Data Ingestion** (`src/data/data_loader.py`): Load labeled reviews from CSV.
-2. **Text Preprocessing** (`src/data/preprocessor.py`): Clean (lowercase, remove special chars), tokenize, strip stopwords.
-3. **Feature Extraction** (pluggable): Convert text to vectors:
-   - **TF-IDF**: Weighted term frequencies (fast, interpretable)
-   - **Bag-of-Words**: Simple word counts (baseline)
-   - _(Add more: Word2Vec, BERT embeddings, etc.)_
-4. **Model Training** (pluggable):
-   - **Logistic Regression**: Fast, linear, highly interpretable
-   - **Naive Bayes**: Probabilistic baseline
-   - _(Add more: SVM, Random Forest, Neural Nets)_
-5. **Evaluation**: Compute accuracy, precision, recall, F1, confusion matrix.
-6. **Inference**: Load trained model + apply same preprocessing → predict on new reviews.
-7. **API Serving**: FastAPI exposes `/predict` endpoint for real-time classification.
+1. **Load** reviews from CSV.
+2. **Clean** and tokenize text.
+3. **Extract features** (TF‑IDF or BoW).
+4. **Train** the model (LogReg or NB).
+5. **Evaluate** with accuracy/F1/confusion matrix.
+6. **Serve** predictions via FastAPI.
 
 ---
 
-## Testing & Quality
+## Testing
 
-### Why This Matters
-
-Quality code is maintainable code. This project treats testing as a first-class citizen:
-
-- **Unit tests** for each module (preprocessor, extractors, models)
-- **Integration tests** for the full pipeline
-- **Coverage tracking** (aiming for >80%)
-- **Continuous Integration** (GitHub Actions runs tests on every push)
-
-### Running Tests
+I keep tests close to the code because I refactor frequently. Coverage is tracked and the pipeline has integration tests.
 
 ```bash
 # Run all tests
@@ -207,19 +164,6 @@ pip install coverage
 coverage run -m unittest discover tests -v
 coverage report
 coverage html  # Open htmlcov/index.html in browser
-```
-
-### Test Coverage
-
-```
-Name                                    Stmts   Miss  Cover
-────────────────────────────────────────────────────────────
-src/data/preprocessor.py                  15      2    87%
-src/features/tfidf_extractor.py           18      1    94%
-src/models/logreg_model.py                22      3    86%
-src/pipeline/sentiment_classifier.py      25      2    92%
-────────────────────────────────────────────────────────────
-TOTAL                                    120     12    90%
 ```
 
 ---
@@ -252,8 +196,8 @@ curl http://localhost:8080/health
 
 ```bash
 curl -X POST http://localhost:8080/predict \
-  -H "Content-Type: application/json" \
-  -d '{"text": "This product exceeded my expectations!"}'
+    -H "Content-Type: application/json" \
+    -d '{"text": "This product exceeded my expectations!"}'
 ```
 
 **Response:**
@@ -274,16 +218,16 @@ curl -X POST http://localhost:8080/predict \
 
 ### Schemas
 
-Defined in `src/app/schemas.py` with Pydantic validation:
+Defined in `src/app/schemas.py`:
 
 ```python
 class ReviewRequest(BaseModel):
-    text: str
+        text: str
 
 class ReviewResponse(BaseModel):
-    text: str
-    rating: float
-    sentiment: str
+        text: str
+        rating: float
+        sentiment: str
 ```
 
 ---
@@ -294,7 +238,6 @@ class ReviewResponse(BaseModel):
 
 - Python 3.8+
 - pip or conda
-- Basic understanding of ML (optional, but helpful)
 
 ### Installation
 
@@ -321,7 +264,7 @@ This will:
 
 1. Load raw reviews from `data/raw/`
 2. Preprocess text
-3. Extract features (TF-IDF or BoW)
+3. Extract features (TF‑IDF or BoW)
 4. Train selected model
 5. Save model artifact to `models/`
 6. Log metrics (accuracy, F1, confusion matrix)
@@ -345,49 +288,29 @@ feature_extractor: "tfidf" # or "bow"
 model: "logistic_regression" # or "naive_bayes"
 ```
 
-That's it. No code changes needed. This is the power of the Strategy Pattern.
-
 ---
 
-## Key Design Decisions
+## Design Decisions
 
-### 1. Why Strategy Pattern?
+### 1. Strategy Pattern
 
-The Strategy Pattern eliminates the "feature-selection-gets-messy" problem. Instead of:
-
-```python
-if use_tfidf:
-    vectors = tfidf(text)
-else:
-    vectors = bow(text)
-```
-
-You get:
-
-```python
-feature_extractor = TFIDFExtractor()  # swap to BOWExtractor() in one line
-classifier.extract_features(text, feature_extractor)
-```
-
-This scales: Add a new extractor without modifying the pipeline.
+I don’t want feature or model swaps to cascade into pipeline edits. Using a strategy interface keeps the orchestration stable.
 
 ### 2. Centralized Configuration
 
-All hyperparameters live in `config/config.yaml`, not scattered through code. Change model in config, not in `main.py`.
+All hyperparameters live in `config/config.yaml`. I avoid “hidden defaults” buried in code.
 
-### 3. Testing from Day One
+### 3. Tests from Day One
 
-Every module has corresponding tests. This makes refactoring safe and catches regressions early.
+I refactor aggressively, so tests are my safety net. It keeps experiments honest.
 
 ### 4. Separation of Concerns
 
-- **Data layer** handles loading/preprocessing
+- **Data layer** loads and cleans
 - **Feature layer** extracts signals
-- **Model layer** makes predictions
-- **Pipeline layer** orchestrates everything
-- **API layer** exposes to the world
-
-Each can evolve independently.
+- **Model layer** trains/predicts
+- **Pipeline layer** orchestrates
+- **API layer** serves
 
 ---
 
@@ -410,9 +333,9 @@ python -c "from src.utils.metrics import print_metrics; print_metrics('models/tr
 
 Output includes:
 
-- **Confusion Matrix**: Visual breakdown of predictions
-- **Classification Report**: Precision, Recall, F1 per class
-- **ROC-AUC**: Model discrimination ability
+- **Confusion Matrix**
+- **Classification Report**
+- **ROC-AUC**
 
 ---
 
@@ -433,14 +356,7 @@ docker run -p 8080:8080 sentiment-analyzer
 
 ### Production (CI/CD)
 
-GitHub Actions automatically:
-
-1. Runs tests on every push
-2. Generates coverage reports
-3. Builds Docker image
-4. Deploys to cloud (Render, AWS, GCP, etc.)
-
-See `.github/workflows/` for configuration.
+GitHub Actions runs tests, builds the image, and publishes artifacts on push. See `.github/workflows/` for the details.
 
 ---
 
@@ -453,9 +369,9 @@ See `.github/workflows/` for configuration.
 from src.features.base_feature_extractor import BaseFeatureExtractor
 
 class Word2VecExtractor(BaseFeatureExtractor):
-    def extract(self, text):
-        # Your implementation here
-        return vectors
+        def extract(self, text):
+                # Your implementation here
+                return vectors
 ```
 
 Then update `config/config.yaml`:
@@ -471,29 +387,18 @@ feature_extractor: "word2vec"
 from src.models.model_interface import ModelInterface
 
 class SVMClassifier(ModelInterface):
-    def train(self, X, y):
-        # Your SVM training logic
-        pass
+        def train(self, X, y):
+                # Your SVM training logic
+                pass
 ```
 
-Again, just update the config. The pipeline doesn't change.
-
----
-
-## Learning Resources
-
-- [Design Patterns in Python](https://refactoring.guru/design-patterns/strategy/python/example)
-- [ML Project Structure](https://drivendata.github.io/cookiecutter-data-science/)
-- [Andrew Ng: Structuring ML Projects](https://www.deeplearning.ai/short-courses/structuring-machine-learning-projects/)
-- [Text Classification Best Practices](https://nlp.stanford.edu/pubs/crosslingual_embeddings.pdf)
+Update the config and the pipeline stays unchanged.
 
 ---
 
 ## About This Project
 
-Built as a professional learning resource to demonstrate how real ML systems are structured, tested, and deployed. It's not a toy—it's how teams actually build this stuff.
-
-**Questions?** Open an issue, start a discussion, or reach out. This is a living project; contributions and feedback are welcome.
+I built this as a practical reference: how I’d structure a real ML sentiment system so it’s testable, swappable, and actually deployable. If you want to extend it, open a PR or issue.
 
 ---
 
