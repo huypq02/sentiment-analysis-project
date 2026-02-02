@@ -1,180 +1,146 @@
 # Sentiment Analysis of Product Reviews
 
-> **A production-grade ML system built end-to-end to show how I’d ship a real sentiment classifier.**
+A working ML pipeline for sentiment classification. Loads reviews, cleans text, extracts features with TF-IDF or Bag-of-Words, trains a classifier (Logistic Regression or Naive Bayes), and serves predictions via FastAPI. Swappable components throughout so you can try different feature extractors and models without touching the core pipeline logic.
 
-## Overview
-
-I built this as a full pipeline, not a notebook demo. It loads real review data, cleans it, extracts features, trains a model, and serves predictions over an API. The core idea is simple: every piece is a swap-in component (feature extractors, models, and pipelines), so I can compare approaches without rewriting the system.
-
-It’s structured the way I build production ML: configuration-driven, testable, and easy to extend. I wanted this to feel like a repo you could hand to another engineer and they’d be productive immediately.
+Built to be testable and actually runnable, not a tutorial.
 
 ## Quick Start
 
 ```bash
-# Clone, install, and train in ~5 minutes
-git clone <repo>
-cd sentiment-analysis-project
 pip install -r requirements.txt
-python src/pipeline/train_pipeline.py
+python src/pipeline/training.py
 
 # Start the API
 uvicorn src.app.main:app --host 0.0.0.0 --port 8080
 
-# Try a prediction
+# Make a prediction
 curl -X POST http://localhost:8080/predict \
     -H "Content-Type: application/json" \
-    -d '{"text":"This product exceeded my expectations!"}'
+    -d '{"text":"The book was terrible and I hated it"}'
 ```
+
+The training script loads the book reviews CSV, preprocesses the text, extracts features, trains on the data, and saves the model + extractor to `models/`. The API loads those artifacts on startup and serves predictions.
 
 ## Table of Contents
 
-1. [Why It’s Built This Way](#why-its-built-this-way)
-2. [Project Structure](#project-structure)
-3. [Architecture Notes](#architecture-notes)
-4. [How the Pipeline Runs](#how-the-pipeline-runs)
-5. [Testing](#testing)
-6. [API Usage](#api-usage)
-7. [Getting Started](#getting-started)
-8. [Design Decisions](#design-decisions)
-9. [Performance & Metrics](#performance--metrics)
-10. [Deployment](#deployment)
+1. [Why This Structure](#why-this-structure)
+2. [What's Inside](#whats-inside)
+3. [How It Works](#how-it-works)
+4. [Running Tests](#running-tests)
+5. [API Endpoints](#api-endpoints)
+6. [Configuration](#configuration)
+7. [Extending It](#extending-it)
 
 ---
 
-## Why It’s Built This Way
+## Why This Structure
 
-- **Strategy pattern everywhere**: I don’t want to touch pipeline code when I swap TF‑IDF for BoW or Logistic Regression for Naive Bayes. That swap happens in config and the rest of the system stays put.
-- **Real structure, not a tutorial**: There’s a clean separation between data, features, models, pipelines, and API. It keeps the codebase stable as it grows.
-- **Tests that actually help**: I added unit tests early because I refactor a lot when experimenting. The tests keep the surface area honest.
+The main goal: I want to swap TF-IDF for Bag-of-Words, or swap Logistic Regression for Naive Bayes, without touching the actual pipeline orchestration code. Everything that can vary lives in one of four layers:
+
+- **Data layer**: Loads CSVs, handles columns
+- **Feature layer**: TF-IDF, Bag-of-Words (add more)
+- **Model layer**: LogReg, Naive Bayes (add more)
+- **Pipeline layer**: Orchestrates everything
+
+Configuration tells the system which components to use. Unit tests guard against breakage when I refactor. The API is thin and just calls the pipeline.
 
 ---
 
-## Project Structure
+## What's Inside
 
 ```
 sentiment-analysis-project/
 │
-├── src/                           # Core application code
+├── src/
 │   ├── data/
-│   │   ├── data_loader.py        # Load & parse review datasets
-│   │   └── preprocessor.py       # Text cleaning, tokenization
+│   │   ├── data_loader.py         # Reads CSV
+│   │   └── preprocessor.py        # Lowercase, remove punctuation, tokenize, drop stopwords
 │   ├── features/
-│   │   ├── base_feature_extractor.py  # Abstract interface
-│   │   ├── bow_extractor.py           # Bag-of-Words strategy
-│   │   └── tfidf_extractor.py         # TF-IDF strategy
+│   │   ├── base_feature_extractor.py
+│   │   ├── bow_extractor.py       # Bag-of-Words
+│   │   └── tfidf_extractor.py     # TF-IDF (currently used)
 │   ├── models/
-│   │   ├── model_interface.py         # Abstract model interface
-│   │   ├── naive_bayes_model.py       # Bernoulli NB classifier
-│   │   └── logreg_model.py            # Logistic Regression classifier
+│   │   ├── model_interface.py     # Abstract base
+│   │   ├── naive_bayes_model.py   # MultinomialNB
+│   │   └── logreg_model.py        # LogisticRegression
 │   ├── pipeline/
-│   │   ├── sentiment_classifier.py    # Main orchestrator
-│   │   ├── train_pipeline.py          # Training workflow
-│   │   ├── predict_pipeline.py        # Inference workflow
-│   │   └── evaluation.py              # Metrics & validation
-│   ├── utils/
-│   │   ├── logger.py                  # Centralized logging
-│   │   ├── load_config.py             # Config file handling
-│   │   └── metrics.py                 # Evaluation metrics
-│   └── app/
-│       ├── main.py                    # FastAPI application
-│       └── schemas.py                 # Request/response models
+│   │   ├── training.py            # Load → Preprocess → Extract → Train → Save
+│   │   ├── prediction.py          # Load model → Preprocess → Extract → Predict
+│   │   └── evaluation.py          # Compute metrics
+│   ├── app/
+│   │   ├── main.py                # FastAPI server
+│   │   └── schemas.py             # Pydantic models
+│   └── utils/
+│       ├── logger.py
+│       └── load_config.py
 │
-├── tests/                         # Unit & integration tests
+├── tests/
 │   ├── test_preprocessor.py
 │   ├── test_feature_extractor.py
 │   ├── test_model.py
 │   └── test_pipeline.py
 │
-├── config/                        # Configuration files
-│   └── config.yaml               # Model, feature, data settings
+├── config/
+│   └── config.yaml                # Points to data, model paths, selects components
 │
 ├── data/
-│   ├── raw/                      # Original review datasets
-│   └── processed/                # Cleaned, ready-to-train data
+│   ├── raw/                       # CSVs go here
+│   └── processed/                 # Cleaned data (if needed)
 │
 ├── models/                        # Trained artifacts
-├── notebooks/                     # EDA & prototyping (coming soon)
-├── Dockerfile                     # Container image
 ├── requirements.txt
-├── Makefile
+├── Dockerfile
 └── README.md
 ```
 
 ---
 
-## Architecture Notes
+## How It Works
 
-I went with a Strategy pattern because I want to compare ideas quickly:
-
-```python
-# Strategy-style wiring
-feature_strategy = TFIDFExtractor()  # or BOWExtractor()
-model_strategy = LogisticRegression()  # or NaiveBayes()
-classifier = SentimentClassifier(feature_strategy, model_strategy)
+```
+Raw CSV → Preprocess → Feature Extract → Train → Evaluate → Serve
+  ↓          ↓              ↓              ↓       ↓         ↓
+Reviews  Tokenize       TF-IDF or      LogReg  Metrics  REST API
+         + stopwords    Bag-of-Words   or NB   (F1, etc)
+         remove negs
 ```
 
-It’s intentionally boring. The goal is for each layer to do one thing well and stay replaceable.
+**Negation handling**: I keep words like "not", "never", "don't" in the text because sentiment depends on them. A preprocessing step removes normal English stopwords _except_ negations.
 
-### Tech Stack
+**Feature extraction**: Both TF-IDF and Bag-of-Words return sparse matrices (mostly zeros). Naive Bayes uses `StandardScaler(with_mean=False)` to handle sparse data without trying to center it.
 
-- **Python 3.8+**
-- **scikit-learn**
-- **FastAPI**
-- **unittest**
-- **YAML**
-- **Docker**
+**Training flow**:
+
+1. Load the CSV
+2. Preprocess text (tokenize, remove stopwords except negations)
+3. 80/20 train-test split
+4. Fit the feature extractor on train data
+5. Transform both train and test
+6. Train the model
+7. Evaluate on test set
+8. Save model + extractor as pickle files
+
+The API loads those pickle files on startup and uses them for inference.
 
 ---
 
-## How the Pipeline Runs
+## Running Tests
 
-```
-[Raw Reviews] → [Preprocess] → [Feature Extract] → [Model] → [Predict]
-        ↓              ↓              ↓               ↓        ↓
-     CSV         Tokenize,      TF-IDF or        Train    REST API
-                            Remove Stop      Bag-of-Words   Classifier  Output
-                            Words
-```
-
-### Stages
-
-1. **Load** reviews from CSV.
-2. **Clean** and tokenize text.
-3. **Extract features** (TF‑IDF or BoW).
-4. **Train** the model (LogReg or NB).
-5. **Evaluate** with accuracy/F1/confusion matrix.
-6. **Serve** predictions via FastAPI.
-
----
-
-## Testing
-
-I keep tests close to the code because I refactor frequently. Coverage is tracked and the pipeline has integration tests.
+Basic unit tests using unittest. They check that preprocessing works, feature extraction returns the right shapes, and models can be trained/evaluated. All use dummy data and are quick.
 
 ```bash
-# Run all tests
 python -m unittest discover tests -v
-
-# Run specific module tests
 python -m unittest tests.test_model -v
-python -m unittest tests.test_feature_extractor -v
 
-# Run with coverage report
-pip install coverage
+# With coverage
 coverage run -m unittest discover tests -v
 coverage report
-coverage html  # Open htmlcov/index.html in browser
+coverage html
 ```
 
 ---
 
-## API Usage
-
-### Start the Service
-
-```bash
-uvicorn src.app.main:app --host 0.0.0.0 --port 8080
-```
+## API Endpoints
 
 ### Health Check
 
@@ -182,7 +148,7 @@ uvicorn src.app.main:app --host 0.0.0.0 --port 8080
 curl http://localhost:8080/health
 ```
 
-**Response:**
+Response:
 
 ```json
 {
@@ -192,159 +158,106 @@ curl http://localhost:8080/health
 }
 ```
 
-### Make a Prediction
+### Predict
 
 ```bash
 curl -X POST http://localhost:8080/predict \
     -H "Content-Type: application/json" \
-    -d '{"text": "This product exceeded my expectations!"}'
+    -d '{"text": "The book was absolutely terrible"}'
 ```
 
-**Response:**
+Response:
 
 ```json
 {
-  "text": "This product exceeded my expectations!",
-  "rating": 4.8,
-  "sentiment": "Positive"
+  "text": "The book was absolutely terrible",
+  "rating": 0.1,
+  "sentiment": "Negative"
 }
 ```
 
-### Sentiment Thresholds
-
-- **Positive**: confidence score ≥ 0.7
-- **Neutral**: 0.4 ≤ score < 0.7
-- **Negative**: score < 0.4
-
-### Schemas
-
-Defined in `src/app/schemas.py`:
-
-```python
-class ReviewRequest(BaseModel):
-        text: str
-
-class ReviewResponse(BaseModel):
-        text: str
-        rating: float
-        sentiment: str
-```
+Ratings come from the model output (0–1 range). Sentiment is assigned by `rating_to_sentiment()` which maps ratings to "Positive", "Neutral", or "Negative" based on thresholds.
 
 ---
 
-## Getting Started
+## Configuration
 
-### Prerequisites
-
-- Python 3.8+
-- pip or conda
-
-### Installation
-
-```bash
-git clone https://github.com/yourusername/sentiment-analysis-project
-cd sentiment-analysis-project
-
-# Create virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### Training a Model
-
-```bash
-# Configure your model in config/config.yaml
-python src/pipeline/train_pipeline.py
-```
-
-This will:
-
-1. Load raw reviews from `data/raw/`
-2. Preprocess text
-3. Extract features (TF‑IDF or BoW)
-4. Train selected model
-5. Save model artifact to `models/`
-6. Log metrics (accuracy, F1, confusion matrix)
-
-### Making Predictions
-
-```python
-from src.pipeline.predict_pipeline import PredictPipeline
-
-pipeline = PredictPipeline(config_path="config/config.yaml")
-result = pipeline.predict("This product is fantastic!")
-print(result)  # {"sentiment": "Positive", "confidence": 0.95}
-```
-
-### Experimenting with Different Strategies
-
-Edit `config/config.yaml`:
+Edit `config/config.yaml` to specify which dataset to load and where to save artifacts:
 
 ```yaml
-feature_extractor: "tfidf" # or "bow"
-model: "logistic_regression" # or "naive_bayes"
+dataset:
+  raw_dir: "data/raw"
+  file: "book_reviews_sample.csv"
+
+models:
+  dir: "models"
+  model: "models/sentiment_logreg.pkl"
+  extractor: "models/tfidf_extractor.pkl"
 ```
+
+The `training.py` script reads this config, loads the CSV, trains, and saves. To swap between TF-IDF and Bag-of-Words, or between LogReg and Naive Bayes, you'd modify the factory calls in `training.py` or refactor to make it config-driven.
 
 ---
 
-## Design Decisions
+## Extending It
 
-### 1. Strategy Pattern
+### Add a New Feature Extractor
 
-I don’t want feature or model swaps to cascade into pipeline edits. Using a strategy interface keeps the orchestration stable.
+1. Create `src/features/word2vec_extractor.py`
+2. Subclass `BaseFeatureExtractor` and implement `fit()` and `transform()`
+3. Add it to the extractor factory
+4. Update training script to use it
 
-### 2. Centralized Configuration
+```python
+from src.features.base_feature_extractor import BaseFeatureExtractor
 
-All hyperparameters live in `config/config.yaml`. I avoid “hidden defaults” buried in code.
+class Word2VecExtractor(BaseFeatureExtractor):
+    def fit(self, sentences):
+        # Train Word2Vec on sentences
+        pass
 
-### 3. Tests from Day One
+    def transform(self, sentences):
+        # Return vectors
+        pass
+```
 
-I refactor aggressively, so tests are my safety net. It keeps experiments honest.
+### Add a New Model
 
-### 4. Separation of Concerns
+1. Create `src/models/svm_model.py`
+2. Subclass `SentimentModel` and implement `train()`, `predict()`, `evaluate()`
+3. Add it to the model factory
+4. Update training script to use it
 
-- **Data layer** loads and cleans
-- **Feature layer** extracts signals
-- **Model layer** trains/predicts
-- **Pipeline layer** orchestrates
-- **API layer** serves
+The pipeline stays the same. Both training and prediction flow through the same orchestration—no changes needed.
 
 ---
 
-## Performance & Metrics
+## Notes
 
-### Benchmark Results
+- **Sparse matrices**: Feature extractors return sparse matrices. Make sure models can handle them. Naive Bayes uses `StandardScaler(with_mean=False)` for this reason.
+- **Stopwords**: Negation words are kept intentionally because they flip sentiment. The preprocessor removes English stopwords _except_ negations.
+- **Persistence**: Models and extractors are saved as pickle files. If you change code, old pickles won't deserialize correctly.
+- **Logging**: Each module has a logger. Output goes to console; can be redirected to files if needed.
 
-| Model               | Feature Extractor | Accuracy | Precision | Recall | F1-Score |
-| ------------------- | ----------------- | -------- | --------- | ------ | -------- |
-| Logistic Regression | TF-IDF            | 0.89     | 0.87      | 0.91   | 0.89     |
-| Naive Bayes         | Bag-of-Words      | 0.84     | 0.82      | 0.86   | 0.84     |
-| Logistic Regression | Bag-of-Words      | 0.86     | 0.85      | 0.88   | 0.86     |
+---
 
-### Evaluation Metrics
+## Performance
 
-```bash
-# Generate detailed report
-python -c "from src.utils.metrics import print_metrics; print_metrics('models/trained_model.pkl')"
-```
+On the sample data, typical results:
 
-Output includes:
+- TF-IDF + LogReg: ~85–90% accuracy
+- Bag-of-Words + Naive Bayes: ~80–85% accuracy
 
-- **Confusion Matrix**
-- **Classification Report**
-- **ROC-AUC**
+Metrics are logged to `models/metrics.txt` after each training run.
 
 ---
 
 ## Deployment
 
-### Local Development
+### Local
 
 ```bash
-uvicorn src.app.main:app --reload --host 0.0.0.0 --port 8080
+uvicorn src.app.main:app --host 0.0.0.0 --port 8080
 ```
 
 ### Docker
@@ -354,62 +267,6 @@ docker build -t sentiment-analyzer .
 docker run -p 8080:8080 sentiment-analyzer
 ```
 
-### Production (CI/CD)
-
-GitHub Actions runs tests, builds the image, and publishes artifacts on push. See `.github/workflows/` for the details.
-
 ---
 
-## Extending the Project
-
-### Add a New Feature Extractor
-
-```python
-# src/features/word2vec_extractor.py
-from src.features.base_feature_extractor import BaseFeatureExtractor
-
-class Word2VecExtractor(BaseFeatureExtractor):
-        def extract(self, text):
-                # Your implementation here
-                return vectors
-```
-
-Then update `config/config.yaml`:
-
-```yaml
-feature_extractor: "word2vec"
-```
-
-### Add a New Model
-
-```python
-# src/models/svm_model.py
-from src.models.model_interface import ModelInterface
-
-class SVMClassifier(ModelInterface):
-        def train(self, X, y):
-                # Your SVM training logic
-                pass
-```
-
-Update the config and the pipeline stays unchanged.
-
----
-
-## About This Project
-
-I built this as a practical reference: how I’d structure a real ML sentiment system so it’s testable, swappable, and actually deployable. If you want to extend it, open a PR or issue.
-
----
-
-### Project Status
-
-- ✅ **Core pipeline**: Fully functional, tested, production-ready
-- ✅ **API layer**: FastAPI with health checks and predictions
-- ✅ **Testing**: >80% code coverage with CI/CD
-- 🚧 **Notebooks**: EDA notebooks coming soon
-- 🚀 **Next**: Advanced extractors (BERT, Word2Vec), ensemble models
-
----
-
-**Pull requests welcome.** This is meant to be learned from and iterated on.
+That's it. No hidden magic, no sprawling config files. The code does what it says it does.
