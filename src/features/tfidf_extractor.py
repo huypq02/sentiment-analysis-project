@@ -5,11 +5,7 @@ from .base_feature_extractor import BaseFeatureExtractor
 class TFIDFExtractor(BaseFeatureExtractor):
     def __init__(
             self, 
-            max_features=5000, 
-            ngram_range=(1, 2), 
-            min_df=1, 
-            max_df=0.9,
-            **vectorizer_kwargs
+            params: dict = {}
     ):
         """Initialize the vectorizer for an extractor.
         
@@ -21,14 +17,7 @@ class TFIDFExtractor(BaseFeatureExtractor):
             sublinear_tf: Sublinear tf scaling for term frequency (default: True).
             **vectorizer_kwargs: Additional keyword arguments for TfidfVectorizer.
         """
-        self.vectorizer = TfidfVectorizer(
-            max_features=max_features,
-            ngram_range=ngram_range,  # Capture phrases like "not bad", "very good"
-            min_df=min_df,            # Remove very rare words
-            max_df=max_df,            # Remove very common words
-            sublinear_tf=True,        # Use logarithmic scaling for term frequency
-            **vectorizer_kwargs
-        )
+        self.vectorizer = TfidfVectorizer(**params)
 
     def fit(self, sentences):
         """

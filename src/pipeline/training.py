@@ -1,7 +1,7 @@
 import os
 import joblib
-from typing import Optional
-from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split, GridSearchCV
 from src.data import DataLoader, Preprocessor
 from src.features import ExtractorFactory
 from src.models import ModelFactory
@@ -48,7 +48,7 @@ def train(
     if config is None:
         logger.error("Failed to load configuration. Exiting.")
         raise RuntimeError("Failed to load configuration.")
-    data_params.data_path = os.path.join(config["dataset"]["raw_dir"], config["dataset"]["file"])
+    data_path = os.path.join(config["dataset"]["raw_dir"], config["dataset"]["file"])
 
     try:
         # 2. Load data
@@ -56,7 +56,7 @@ def train(
         # Define a DataLoader's object
         loader = DataLoader()
         # Import dataset
-        df = loader.load_csv(data_params.data_path)
+        df = loader.load_csv(data_path)
 
         # 3. Preprocessing
         logger.info("Data preprocessing...")
@@ -75,32 +75,46 @@ def train(
             texts_cleaned, labels, test_size=training_conf.test_size, random_state=training_conf.random_state
         )
 
-        # 5. Extractor Features with n-grams
-        logger.info("Implementing the extractor feature...")
+        # 5. Set up pipeline for vectorizer and model
+        logger.info("Setting up the extractor feature...")
         extractor = ExtractorFactory.create_extractor(
             extractor_name=component_sel.extractor_name,
             params=hyperparams.extractor_params
-        )
-        feature_train = extractor.fit_transform(X_train)
-        feature_test = extractor.transform(X_test)
-        logger.info(f"Feature matrix shape: train={feature_train.shape}, test={feature_test.shape}")
-
-        # 6. Model strategy with class balancing
-        logger.info("Implementing the model...")
+        ).vectorizer
+        logger.info("Setting up the model...")
         model = ModelFactory.create_model(
             model_name=component_sel.model_name,
             params=hyperparams.model_params
+        ).classifier
+
+        pipeline = Pipeline([
+            ("extractor", extractor),
+            ("model", model)
+        ])
+
+        # 6. Training pipeline strategy with hyperparmeter fine-tuning
+        grid_search = GridSearchCV(
+            estimator=pipeline,
+            param_grid= hyperparams.param_grid,
+            cv=5
         )
-        if (
-            training_conf.feature_scaling
-        ):
-            feature_train_scaled, feature_test_scaled = model.scale_feature(
-                feature_train, feature_test
-            )  # Feature scaling
-            model.train(feature_train_scaled, y_train)  # Train data on the model
-        else:
-            model.train(feature_train, y_train)
-            feature_test_scaled = feature_test  # Use unscaled features
+
+        grid_search.fit(X_train, y_train)
+
+        print(sorted(grid_search.cv_results_.keys()))
+        logger.info(f"The best hyperparameters: {grid_search.best_params_}")
+
+        best_model = grid_search.best_estimator_
+        # if (
+        #     training_conf.feature_scaling
+        # ):
+        #     feature_train_scaled, feature_test_scaled = model.scale_feature(
+        #         feature_train, feature_test
+        #     )  # Feature scaling
+        #     model.train(feature_train_scaled, y_train, parameters)  # Train data on the model
+        # else:
+        #     model.train(feature_train, y_train, parameters)
+        #     feature_test_scaled = feature_test  # Use unscaled features
 
     except Exception as e:
         logger.exception(f"Unexpected error in training pipeline: {e}")
@@ -112,29 +126,34 @@ def train(
 
     logger.info("Saving model and extractor...")
     # Dump files
-    joblib.dump(model, config["models"]["model"])
+    joblib.dump(best_model, config["models"]["model"])
     joblib.dump(extractor, config["models"]["extractor"])
 
-    return model, extractor, feature_test_scaled, y_test, config
+    logger.info("Training pipeline completed")
+    return best_model, extractor, X_test, y_test, config
 
 
 if __name__ == "__main__":
     train(
-        data_params=DataParameters(),
-        component_sel=ComponentSelection(),
+        data_params=DataParameters(
+            # data_path=os.path.join("data", "raw", "book_reviews_10k_tailored.csv")
+        ),
+        component_sel=ComponentSelection(
+            extractor_name="tfidf",
+            model_name="logreg"
+        ),
         hyperparams=Hyperparameters(
-            extractor_params={
-                "max_features": 5000,
-                "ngram_range": (1, 2),  # Unigrams + bigrams to capture phrases like "not bad"
-                "min_df": 1,
-                "max_df": 0.9
-            },
-            model_params={
-                "solver": "lbfgs",
-                "max_iter": 1000,
-                "random_state": 8888,
-                "C": 1.0,  # Regularization strength (smaller = stronger regularization)
-                "class_weight": "balanced",  # Handle class imbalance automatically
+            param_grid = {
+                "extractor__max_features": [5000, 10000, 15000],
+                "extractor__ngram_range": [(1, 1), (1, 2), (1, 3)],
+                "extractor__min_df": [1, 2],
+                "extractor__max_df": [0.8, 0.9],
+                "extractor__binary": [True, False],
+                "model__random_state": [0, 42],
+                "model__max_iter": [1000, 2000, 5000],
+                "model__class_weight": [None, "balanced"],
+                "model__C":[1, 10],
+                "model__penalty":["l2", "l1"]
             }
         ),
         training_conf=TrainingConfiguration(),

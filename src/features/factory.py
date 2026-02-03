@@ -18,22 +18,12 @@ class ExtractorFactory:
             ValueError: If an unknown extractor_name is provided.
         """
         if extractor_name == "tfidf":
-            if params is None:
-                params = {
-                    "max_features": 5000,
-                    "ngram_range": (1, 2),  # Unigrams + bigrams to capture phrases like "not bad"
-                    "min_df": 2,
-                    "max_df": 0.9
-                }
-            return TFIDFExtractor(**params)
+            if not params:
+                return TFIDFExtractor()
+            return TFIDFExtractor(params)
         elif extractor_name == "bow":
-            if params is None:
-                params = {
-                    "max_features": 5000,
-                    "ngram_range": (1, 2),  # Unigrams + bigrams to capture phrases like "not bad"
-                    "min_df": 2,
-                    "max_df": 0.8
-                }
-            return BagOfWordsExtractor(**params)
+            if not params:
+                return BagOfWordsExtractor()
+            return BagOfWordsExtractor(params)
         else:
             raise ValueError(f"Unknown feature extractor name: {extractor_name}")

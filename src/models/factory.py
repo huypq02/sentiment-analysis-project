@@ -18,20 +18,12 @@ class ModelFactory():
             ValueError: If an unknown model_name is provided.
         """
         if model_name == "logreg":
-            if params is None:
-                params = {
-                    'random_state': 0,
-                    'max_iter': 1000,
-                    'class_weight': 'balanced'  # Handle class imbalance
-                }
+            if not params:
+                return LogisticRegressionModel()
             return LogisticRegressionModel(params)
         elif model_name == "naive_bayes":
-            if params is None:
-                params = {
-                    'alpha': 1.0,           # Smoothing (0=no smoothing, 1=Laplace, higher=more smoothing)
-                    'fit_prior': True,
-                    'class_prior': None
-                }
+            if not params:
+                return NaiveBayesModel()
             return NaiveBayesModel(params)
         else:
             raise ValueError(f"Unknown model name: {model_name}")
