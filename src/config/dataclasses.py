@@ -40,6 +40,7 @@ class Hyperparameters:
     """
     extractor_params: Optional[dict] = None
     model_params: Optional[dict] = None
+    param_grid: Optional[dict] = None
 
 @dataclass
 class TrainingConfiguration:

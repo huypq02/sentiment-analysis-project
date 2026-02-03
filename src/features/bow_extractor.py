@@ -5,12 +5,7 @@ from .base_feature_extractor import BaseFeatureExtractor
 class BagOfWordsExtractor(BaseFeatureExtractor):
     def __init__(
             self,
-            max_features=5000,
-            ngram_range=(1,2),
-            min_df=1,
-            max_df=0.9,
-            binary=True,
-            **vectorizer_kwargs
+            params: dict = {}
     ):
         """
         Initialize BagOfWordsExtractor with customizable parameters.
@@ -23,14 +18,7 @@ class BagOfWordsExtractor(BaseFeatureExtractor):
             binary: Binary BoW captures presence, not frequency, which aligns better with sentiment signals (default: True).
             **vectorizer_kwargs: Additional keyword arguments for CountVectorizer.
         """
-        self.vectorizer = CountVectorizer(
-            max_features=max_features,
-            ngram_range=ngram_range,
-            min_df=min_df,
-            max_df=max_df,
-            binary=binary,
-            **vectorizer_kwargs
-        )
+        self.vectorizer = CountVectorizer(**params)
 
     def fit(self, sentences):
         """
