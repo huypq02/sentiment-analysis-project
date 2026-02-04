@@ -65,22 +65,25 @@ if __name__ == "__main__":
     MLFlowTracking
     )
 
-    model, _, feature_test, label_test, _ = train(
+    model, _, feature_test, label_test = train(
         data_params=DataParameters(),
-        component_sel=ComponentSelection(),
+        component_sel=ComponentSelection(
+            extractor_name="tfidf",
+            model_name="logreg"
+        ),
         hyperparams=Hyperparameters(
-            extractor_params={
-                "max_features": 5000,
-                "ngram_range": (1, 2),  # Unigrams + bigrams to capture phrases like "not bad"
-                "min_df": 2,
-                "max_df": 0.9
-            },
-            model_params={
-                "solver": "lbfgs",
-                "max_iter": 1000,
-                "random_state": 8888,
-                "C": 1.0,  # Regularization strength (smaller = stronger regularization)
-                "class_weight": "balanced",  # Handle class imbalance automatically
+            param_grid = {
+                "extractor__max_features": [5000, 10000],
+                "extractor__ngram_range": [(1,1), (1,2)],
+                "extractor__min_df": [2, 5],
+                "extractor__max_df": [0.8],
+                "extractor__binary": [False],
+
+                "model__solver": ["lbfgs"],
+                "model__penalty": ["l2"],
+                "model__C": [0.1, 1, 5],
+                "model__class_weight": [None, "balanced"],
+                "model__max_iter": [1000]
             }
         ),
         training_conf=TrainingConfiguration(),

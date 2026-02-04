@@ -77,34 +77,36 @@ def train(
 
         # 5. Set up pipeline for vectorizer and model
         logger.info("Setting up the extractor feature...")
-        extractor = ExtractorFactory.create_extractor(
+        extractor_wrapper = ExtractorFactory.create_extractor(
             extractor_name=component_sel.extractor_name,
             params=hyperparams.extractor_params
-        ).vectorizer
+        )
         logger.info("Setting up the model...")
-        model = ModelFactory.create_model(
+        model_wrapper = ModelFactory.create_model(
             model_name=component_sel.model_name,
             params=hyperparams.model_params
-        ).classifier
+        )
 
         pipeline = Pipeline([
-            ("extractor", extractor),
-            ("model", model)
+            ("extractor", extractor_wrapper.vectorizer),
+            ("model", model_wrapper.classifier)
         ])
 
         # 6. Training pipeline strategy with hyperparmeter fine-tuning
         grid_search = GridSearchCV(
             estimator=pipeline,
             param_grid= hyperparams.param_grid,
-            cv=5
+            cv=5,
+            n_jobs=-1
         )
 
         grid_search.fit(X_train, y_train)
-
-        print(sorted(grid_search.cv_results_.keys()))
         logger.info(f"The best hyperparameters: {grid_search.best_params_}")
 
         best_model = grid_search.best_estimator_
+        model_wrapper.classifier = best_model.named_steps['model']
+        extractor_wrapper.vectorizer = best_model.named_steps['extractor']
+        feature_test_transformed = extractor_wrapper.vectorizer.transform(X_test)
         # if (
         #     training_conf.feature_scaling
         # ):
@@ -118,7 +120,7 @@ def train(
 
     except Exception as e:
         logger.exception(f"Unexpected error in training pipeline: {e}")
-        return RuntimeError("Training pipeline failed")
+        raise RuntimeError("Training pipeline failed")
 
     # 7. Save model and feature extractor
     # Create new folder with the name 'models' if it doesn't exist
@@ -126,17 +128,18 @@ def train(
 
     logger.info("Saving model and extractor...")
     # Dump files
-    joblib.dump(best_model, config["models"]["model"])
-    joblib.dump(extractor, config["models"]["extractor"])
+    joblib.dump(model_wrapper, config["models"]["model"])
+    joblib.dump(extractor_wrapper, config["models"]["extractor"])
 
     logger.info("Training pipeline completed")
-    return best_model, extractor, X_test, y_test, config
+
+    return model_wrapper, extractor_wrapper, feature_test_transformed, y_test
 
 
 if __name__ == "__main__":
     train(
         data_params=DataParameters(
-            # data_path=os.path.join("data", "raw", "book_reviews_10k_tailored.csv")
+            data_path=os.path.join("data", "raw", "book_reviews_10k_tailored.csv")
         ),
         component_sel=ComponentSelection(
             extractor_name="tfidf",
@@ -144,16 +147,17 @@ if __name__ == "__main__":
         ),
         hyperparams=Hyperparameters(
             param_grid = {
-                "extractor__max_features": [5000, 10000, 15000],
-                "extractor__ngram_range": [(1, 1), (1, 2), (1, 3)],
-                "extractor__min_df": [1, 2],
-                "extractor__max_df": [0.8, 0.9],
-                "extractor__binary": [True, False],
-                "model__random_state": [0, 42],
-                "model__max_iter": [1000, 2000, 5000],
+                "extractor__max_features": [5000, 10000],
+                "extractor__ngram_range": [(1,1), (1,2)],
+                "extractor__min_df": [2, 5],
+                "extractor__max_df": [0.8],
+                "extractor__binary": [False],  # important
+
+                "model__solver": ["lbfgs"],
+                "model__penalty": ["l2"],
+                "model__C": [0.1, 1, 5],
                 "model__class_weight": [None, "balanced"],
-                "model__C":[1, 10],
-                "model__penalty":["l2", "l1"]
+                "model__max_iter": [1000]
             }
         ),
         training_conf=TrainingConfiguration(),
