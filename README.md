@@ -163,20 +163,20 @@ Response:
 ```bash
 curl -X POST http://localhost:8080/predict \
     -H "Content-Type: application/json" \
-    -d '{"text": "The book was absolutely terrible"}'
+    -d '{"text": "These books are too bad!"}'
 ```
 
 Response:
 
 ```json
 {
-  "text": "The book was absolutely terrible",
-  "rating": 0.1,
+  "text": "These books are too bad!",
+  "rating": 1,
   "sentiment": "Negative"
 }
 ```
 
-Ratings come from the model output (0–1 range). Sentiment is assigned by `rating_to_sentiment()` which maps ratings to "Positive", "Neutral", or "Negative" based on thresholds.
+Ratings come from the model output (1-5 range). Sentiment is assigned by `rating_to_sentiment()` which maps ratings to "Positive", "Neutral", or "Negative" based on thresholds.
 
 ---
 
