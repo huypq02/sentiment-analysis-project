@@ -163,14 +163,14 @@ Response:
 ```bash
 curl -X POST http://localhost:8080/predict \
     -H "Content-Type: application/json" \
-    -d '{"text": "The book was absolutely terrible"}'
+    -d '{"text": "These books are too bad!"}'
 ```
 
 Response:
 
 ```json
 {
-  "text": "The book was absolutely terrible",
+  "text": "These books are too bad!",
   "rating": 1,
   "sentiment": "Negative"
 }
