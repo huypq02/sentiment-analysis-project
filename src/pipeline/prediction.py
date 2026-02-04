@@ -61,10 +61,24 @@ if __name__ == "__main__":
         model = joblib.load(config["models"]["model"])
         extractor = joblib.load(config["models"]["extractor"])
     else:
-        model, extractor, _, _, _ = train(
+        model, extractor, _, _ = train(
             data_params=DataParameters(),
             component_sel=ComponentSelection(),
-            hyperparams=Hyperparameters(),
+            hyperparams=Hyperparameters(
+                param_grid = {
+                    "extractor__max_features": [5000, 10000],
+                    "extractor__ngram_range": [(1,1), (1,2)],
+                    "extractor__min_df": [2, 5],
+                    "extractor__max_df": [0.8],
+                    "extractor__binary": [False],  # important
+
+                    "model__solver": ["lbfgs"],
+                    "model__penalty": ["l2"],
+                    "model__C": [0.1, 1, 5],
+                    "model__class_weight": [None, "balanced"],
+                    "model__max_iter": [1000]
+                }
+            ),
             training_conf=TrainingConfiguration(),
             file_paths=FilePaths(),
             mlflow_tracking=MLFlowTracking()
@@ -73,5 +87,5 @@ if __name__ == "__main__":
     predict(
         model=model,
         extractor=extractor,
-        text="These books are not good!"
+        text="These books are good!"
     )
