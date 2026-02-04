@@ -171,12 +171,12 @@ Response:
 ```json
 {
   "text": "The book was absolutely terrible",
-  "rating": 0.1,
+  "rating": 1,
   "sentiment": "Negative"
 }
 ```
 
-Ratings come from the model output (0–1 range). Sentiment is assigned by `rating_to_sentiment()` which maps ratings to "Positive", "Neutral", or "Negative" based on thresholds.
+Ratings come from the model output (1-5 range). Sentiment is assigned by `rating_to_sentiment()` which maps ratings to "Positive", "Neutral", or "Negative" based on thresholds.
 
 ---
 
