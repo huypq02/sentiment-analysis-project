@@ -18,28 +18,65 @@ class LogisticRegressionModel(SentimentModel):
                 "random_state": 0
             }
     ):
-        """Initialize the Logistic Regression and Standard scaler."""
+        """
+        Initialize the Logistic Regression and Standard scaler.
+        
+        :param params: Parameters for LogisticRegression
+        :type params: dict
+        """
         self.classifier = LogisticRegression(**params)
         self.scaler = StandardScaler(
             with_mean=False
         )  # with_mean=False works with the sparse matrix (mostly zeros)
 
     def scale_feature(self, features, feature_test):
-        """Feature scaling the provided features."""
+        """
+        Feature scaling the provided features.
+        
+        :param features: Training features
+        :type features: array-like
+        :param feature_test: Test features
+        :type feature_test: array-like
+        :return: Tuple of scaled features (features, feature_test)
+        :rtype: tuple
+        """
         features = self.scaler.fit_transform(features)
         feature_test = self.scaler.transform(feature_test)
         return features, feature_test
 
     def train(self, features, labels):
-        """Train Logistic Regression model"""
+        """
+        Train Logistic Regression model.
+        
+        :param features: Training features
+        :type features: array-like
+        :param labels: Training labels
+        :type labels: array-like
+        """
         self.classifier.fit(features, labels)
 
     def predict(self, feature_test):
-        """Make predictions"""
+        """
+        Make predictions.
+        
+        :param feature_test: Test features
+        :type feature_test: array-like
+        :return: Predictions
+        :rtype: numpy.ndarray
+        """
         return self.classifier.predict(feature_test)
 
     def evaluate(self, feature_test, label_test):
-        """Evaluate Logistic Regression model with comprehensive metrics"""
+        """
+        Evaluate Logistic Regression model with comprehensive metrics.
+        
+        :param feature_test: Test features
+        :type feature_test: array-like
+        :param label_test: Test labels
+        :type label_test: array-like
+        :return: Dictionary containing evaluation metrics
+        :rtype: dict
+        """
         y_pred = self.classifier.predict(feature_test)
         
         return {

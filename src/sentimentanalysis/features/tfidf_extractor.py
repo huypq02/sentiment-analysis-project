@@ -7,15 +7,11 @@ class TFIDFExtractor(BaseFeatureExtractor):
             self, 
             params: dict = {}
     ):
-        """Initialize the vectorizer for an extractor.
+        """
+        Initialize the vectorizer for an extractor.
         
-        Args:
-            max_features: Maximum number of features (default: 5000).
-            ngram_range: Range of n-grams to extract (default: (1,2) for unigrams and bigrams).
-            min_df: Ignore terms appearing in fewer documents (default: 1).
-            max_df: Ignore terms appearing in more than this proportion of docs (default: 0.9).
-            sublinear_tf: Sublinear tf scaling for term frequency (default: True).
-            **vectorizer_kwargs: Additional keyword arguments for TfidfVectorizer.
+        :param params: Parameters for TfidfVectorizer (max_features, ngram_range, min_df, max_df, sublinear_tf, etc.)
+        :type params: dict
         """
         self.vectorizer = TfidfVectorizer(**params)
 
@@ -23,8 +19,8 @@ class TFIDFExtractor(BaseFeatureExtractor):
         """
         Fit the extractor on training texts using TF-IDF.
 
-        Args:
-            sentences: List of text documents to fit the vectorizer on.
+        :param sentences: List of text documents to fit the vectorizer on
+        :type sentences: list[str]
         """
         self.vectorizer.fit(sentences)
 
@@ -32,7 +28,9 @@ class TFIDFExtractor(BaseFeatureExtractor):
         """
         Transform text into numerical representations after vectorization.
         
-        Args:
-            sentences: List of text documents to transform.
+        :param sentences: List of text documents to transform
+        :type sentences: list[str]
+        :return: Transformed TF-IDF features
+        :rtype: scipy.sparse.csr_matrix
         """
         return self.vectorizer.transform(sentences)

@@ -5,6 +5,12 @@ from nltk.corpus import stopwords
 
 
 def ensure_nltk_resources():
+    """
+    Ensure NLTK resources (punkt tokenizer and stopwords) are downloaded.
+    
+    :return: None
+    :rtype: None
+    """
     try:
         nltk.data.find("tokenizers/punkt")
     except LookupError:
@@ -22,7 +28,14 @@ class Preprocessor:
         ensure_nltk_resources()
 
     def preprocess(self, text):
-        """Implement stop words, lowercase, punctuation removal and tokenization"""
+        """
+        Implement stop words, lowercase, punctuation removal and tokenization.
+        
+        :param text: Input text to preprocess
+        :type text: str
+        :return: List of preprocessed tokens
+        :rtype: list[str]
+        """
         # Lowercase and Punctuation Removal
         text = re.sub(r"[^\w\s\-]", " ", text).lower()
 

@@ -7,15 +7,13 @@ class ExtractorFactory:
         """
         Create a feature extractor.
 
-        Args:
-            extractor_name (str): The name of the extractor to create. Supported values are 'tfidf' and 'bow'.
-            params (Optional[dict]): Parameters to initialize the extractor. If None, default parameters are used.
-
-        Returns:
-            An instance of the specified feature extractor.
-
-        Raises:
-            ValueError: If an unknown extractor_name is provided.
+        :param extractor_name: The name of the extractor to create (Supported: 'tfidf', 'bow')
+        :type extractor_name: str
+        :param params: Parameters to initialize the extractor (If None, default parameters are used)
+        :type params: Optional[dict]
+        :return: An instance of the specified feature extractor
+        :rtype: BaseFeatureExtractor
+        :raises ValueError: If an unknown extractor_name is provided
         """
         if extractor_name == "tfidf":
             if not params:

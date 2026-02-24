@@ -2,7 +2,14 @@ import yaml
 
 
 def load_config(path):
-    """Load config safely with error handling."""
+    """
+    Load config safely with error handling.
+    
+    :param path: Path to YAML configuration file
+    :type path: str
+    :return: Configuration dictionary or None if error
+    :rtype: dict or None
+    """
     try:
         with open(path, "r") as f:
             return yaml.safe_load(f)

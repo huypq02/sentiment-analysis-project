@@ -10,15 +10,17 @@ logger = setup_logging(__name__)
 
 
 def predict(model, extractor, text: str):
-    """Make a prediction.
+    """
+    Make a prediction.
     
-    Args:
-        model: Trained model
-        extractor: Feature extractor
-        text: Text to predict sentiment for
-        
-    Returns:
-        prediction (int)
+    :param model: Trained model
+    :type model: SentimentModel
+    :param extractor: Feature extractor
+    :type extractor: BaseFeatureExtractor
+    :param text: Text to predict sentiment for
+    :type text: str
+    :return: Prediction result
+    :rtype: int
     """
 
     try:

@@ -14,14 +14,14 @@ def evaluate(
     """
     Evaluate model performance (accuracy, f1, confusion matrix...).
 
-    Args:
-        model: Trained model object with an evaluate method.
-        feature_test: Test feature matrix (vectorized/scaled).
-        label_test: True labels for the test set.
-        config_path (str, optional): Path to configuration YAML file. Defaults to "config/config.yaml".
-
-    Returns:
-        dict: Dictionary containing evaluation metrics (accuracy, precision, recall, f1, confusion matrix, classification report).
+    :param evaluate_model: Trained model object with an evaluate method
+    :type evaluate_model: SentimentModel
+    :param feature_test: Test feature matrix (vectorized/scaled)
+    :type feature_test: array-like
+    :param label_test: True labels for the test set
+    :type label_test: array-like
+    :return: Dictionary containing evaluation metrics (accuracy, precision, recall, f1, confusion matrix, classification report)
+    :rtype: dict
     """
 
     try:

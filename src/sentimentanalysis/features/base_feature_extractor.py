@@ -9,8 +9,8 @@ class BaseFeatureExtractor(ABC):
         """
         Fit the extractor on training texts.
         
-        Args:
-            sentences: List of text documents.
+        :param sentences: List of text documents
+        :type sentences: list[str]
         """
         pass
 
@@ -19,8 +19,10 @@ class BaseFeatureExtractor(ABC):
         """
         Transform text into numerical representations.
         
-        Args:
-            sentences: List of text documents.
+        :param sentences: List of text documents
+        :type sentences: list[str]
+        :return: Transformed features
+        :rtype: array-like
         """
         pass
 
@@ -28,8 +30,10 @@ class BaseFeatureExtractor(ABC):
         """
         Fit the extractor and transform text into numerical representations.
         
-        Args:
-            sentences: List of text documents.
+        :param sentences: List of text documents
+        :type sentences: list[str]
+        :return: Transformed features
+        :rtype: array-like
         """
         self.fit(sentences)
         return self.transform(sentences)

@@ -7,15 +7,13 @@ class ModelFactory():
         """
         Create a model.
 
-        Args:
-            model_name (str): The name of the model to create. Supported values are 'logreg' and 'naive_bayes'.
-            params (Optional[dict]): Parameters to initialize the model. If None, default parameters are used.
-
-        Returns:
-            An instance of the specified model.
-
-        Raises:
-            ValueError: If an unknown model_name is provided.
+        :param model_name: The name of the model to create (Supported: 'logreg', 'naive_bayes')
+        :type model_name: str
+        :param params: Parameters to initialize the model (If None, default parameters are used)
+        :type params: Optional[dict]
+        :return: An instance of the specified model
+        :rtype: SentimentModel
+        :raises ValueError: If an unknown model_name is provided
         """
         if model_name == "logreg":
             if not params:

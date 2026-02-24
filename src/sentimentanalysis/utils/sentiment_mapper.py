@@ -1,11 +1,11 @@
 def rating_to_sentiment(rating):
-    """Convert numeric rating (1-5) to sentiment label.
+    """
+    Convert numeric rating (1-5) to sentiment label.
     
-    Args:
-        rating: Numeric rating between 1-5
-        
-    Returns:
-        str: 'Negative', 'Neutral', or 'Positive'
+    :param rating: Numeric rating between 1-5
+    :type rating: int
+    :return: Sentiment label
+    :rtype: str
     """
     if rating <= 2:
         return 'Negative'
