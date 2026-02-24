@@ -3,9 +3,9 @@ from fastapi import FastAPI, HTTPException
 import uvicorn
 import os
 import joblib
-from src.pipeline import predict, train
-from src.utils import rating_to_sentiment, load_config
-from src.config import (
+from sentimentanalysis.pipeline import predict, train
+from sentimentanalysis.utils import rating_to_sentiment, load_config
+from sentimentanalysis.config import (
     DataParameters, 
     ComponentSelection,
     Hyperparameters,
@@ -60,7 +60,7 @@ def health_check():
     }
 
 
-@app.post("/predict")
+@app.post("/predictions")
 async def prediction(request: ReviewRequest):
     text = request.text
     if text is None or text == "":

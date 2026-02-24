@@ -1,7 +1,7 @@
 import os
 from .training import train
-from src.utils import load_config, setup_logging
-from src.config import DEFAULT_CONFIG_PATH
+from sentimentanalysis.utils import load_config, setup_logging
+from sentimentanalysis.config import DEFAULT_CONFIG_PATH
 
 logger = setup_logging(__name__)
 
@@ -56,7 +56,7 @@ def evaluate(
 
 
 if __name__ == "__main__":
-    from src.config import (
+    from sentimentanalysis.config import (
     DataParameters, 
     ComponentSelection,
     Hyperparameters,

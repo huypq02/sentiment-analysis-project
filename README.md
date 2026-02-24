@@ -209,7 +209,7 @@ The `training.py` script reads this config, loads the CSV, trains, and saves. To
 4. Update training script to use it
 
 ```python
-from src.features.base_feature_extractor import BaseFeatureExtractor
+from sentimentanalysis.features.base_feature_extractor import BaseFeatureExtractor
 
 class Word2VecExtractor(BaseFeatureExtractor):
     def fit(self, sentences):
