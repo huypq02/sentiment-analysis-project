@@ -16,22 +16,50 @@ class NaiveBayesModel(SentimentModel):
             self,
             params: dict = {}
     ):
-        """Initialize the Naive Bayes model and Standard scaler."""
+        """
+        Initialize the Naive Bayes model and Standard scaler.
+        
+        :param params: Parameters for MultinomialNB
+        :type params: dict
+        """
         self.classifier = MultinomialNB(**params)
         self.scaler = StandardScaler(
             with_mean=False
         )  # with_mean=False works with the sparse matrix (mostly zeros)
 
     def train(self, features, labels):
-        """Train the provided data on the Naive Bayes model."""
+        """
+        Train the provided data on the Naive Bayes model.
+        
+        :param features: Training features
+        :type features: array-like
+        :param labels: Training labels
+        :type labels: array-like
+        """
         self.classifier.fit(features, labels)
 
     def predict(self, feature_test):
-        """Make a prediction."""
+        """
+        Make a prediction.
+        
+        :param feature_test: Test features
+        :type feature_test: array-like
+        :return: Predictions
+        :rtype: numpy.ndarray
+        """
         return self.classifier.predict(feature_test)
 
     def evaluate(self, feature_test, label_test):
-        """Evaluate Naive Bayes model"""
+        """
+        Evaluate Naive Bayes model.
+        
+        :param feature_test: Test features
+        :type feature_test: array-like
+        :param label_test: Test labels
+        :type label_test: array-like
+        :return: Dictionary containing evaluation metrics
+        :rtype: dict
+        """
         y_pred = self.classifier.predict(feature_test)
         
         return {

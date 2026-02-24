@@ -29,16 +29,20 @@ def train(
     """
     The training pipeline on the model.
 
-    Args:
-        data_params (DataParameters): Parameters related to data loading and columns.
-        component_sel (ComponentSelection): Selection of feature extractor and model.
-        hyperparams (Hyperparameters): Hyperparameters for extractor and model.
-        training_conf (TrainingConfiguration): Training configuration such as test size, random state, and feature scaling.
-        file_paths (FilePaths): File paths for configuration, models, and other artifacts.
-        mlflow_tracking (MLFlowTracking): MLflow tracking configuration for experiment logging.
-
-    Returns:
-        tuple: (model, extractor, feature_test_scaled, y_test, config)
+    :param data_params: Parameters related to data loading and columns
+    :type data_params: DataParameters
+    :param component_sel: Selection of feature extractor and model
+    :type component_sel: ComponentSelection
+    :param hyperparams: Hyperparameters for extractor and model
+    :type hyperparams: Hyperparameters
+    :param training_conf: Training configuration such as test size, random state, and feature scaling
+    :type training_conf: TrainingConfiguration
+    :param file_paths: File paths for configuration, models, and other artifacts
+    :type file_paths: FilePaths
+    :param mlflow_tracking: MLflow tracking configuration for experiment logging
+    :type mlflow_tracking: MLFlowTracking
+    :return: Tuple containing (model, extractor, feature_test_scaled, y_test, config)
+    :rtype: tuple
     """
 
     # 1. Load config

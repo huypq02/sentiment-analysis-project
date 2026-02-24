@@ -24,6 +24,12 @@ extractor = None
 config = None
 
 def load_artifact():
+    """
+    Load trained model and feature extractor from disk or train new ones if not found.
+    
+    :return: None
+    :rtype: None
+    """
     global model, extractor, config
 
     config_path = os.environ.get("CONFIG_PATH", DEFAULT_CONFIG_PATH) 
@@ -45,6 +51,14 @@ def load_artifact():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    Application lifespan manager for startup and shutdown events.
+    
+    :param app: FastAPI application instance
+    :type app: FastAPI
+    :return: Async context manager
+    :rtype: AsyncGenerator
+    """
     load_artifact()
     yield
 
@@ -53,6 +67,12 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/health")
 def health_check():
+    """
+    Health check endpoint to verify service status.
+    
+    :return: Service health status information
+    :rtype: dict
+    """
     return {
         "status": HEALTHY_STATUS,
         "service": SERVICE_NAME,
@@ -62,6 +82,15 @@ def health_check():
 
 @app.post("/predictions")
 async def prediction(request: ReviewRequest):
+    """
+    Predict sentiment for the provided review text.
+    
+    :param request: Review request containing text to analyze
+    :type request: ReviewRequest
+    :return: Prediction response with rating and sentiment
+    :rtype: ReviewResponse
+    :raises HTTPException: If text is empty or None
+    """
     text = request.text
     if text is None or text == "":
         raise HTTPException(status_code=400, detail="The text should not be empty or none.")
