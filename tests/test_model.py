@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from src import LogisticRegressionModel, NaiveBayesModel
+from sentimentanalysis import LogisticRegressionModel, NaiveBayesModel
 
 
 class TestLogisticRegressionModel(unittest.TestCase):

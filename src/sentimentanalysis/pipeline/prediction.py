@@ -89,5 +89,5 @@ if __name__ == "__main__":
     predict(
         model=model,
         extractor=extractor,
-        text="These books are good!"
+        text="These types of movies are good!"
     )

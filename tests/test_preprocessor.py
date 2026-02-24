@@ -1,5 +1,5 @@
 import unittest
-from src import Preprocessor
+from sentimentanalysis import Preprocessor
 
 
 class TestPreprocessor(unittest.TestCase):
@@ -10,7 +10,7 @@ class TestPreprocessor(unittest.TestCase):
             preprocessor.preprocess("You SHOULD TAKE this course!"), ["take", "course"]
         )        
         self.assertEqual(
-            preprocessor.preprocess("The books are not bad!"), ["books", "not", "bad"]
+            preprocessor.preprocess("The movie is not bad!"), ["movie", "not", "bad"]
         )
 
 
