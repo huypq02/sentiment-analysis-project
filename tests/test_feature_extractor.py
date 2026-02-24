@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from src import BagOfWordsExtractor, TFIDFExtractor
+from sentimentanalysis import BagOfWordsExtractor, TFIDFExtractor
 
 
 class TestBagOfWordsExtractor(unittest.TestCase):

@@ -16,10 +16,10 @@ uvicorn src.app.main:app --host 0.0.0.0 --port 8080
 # Make a prediction
 curl -X POST http://localhost:8080/predict \
     -H "Content-Type: application/json" \
-    -d '{"text":"The book was terrible and I hated it"}'
+    -d '{"text":"The movie was terrible and I hated it"}'
 ```
 
-The training script loads the book reviews CSV, preprocesses the text, extracts features, trains on the data, and saves the model + extractor to `models/`. The API loads those artifacts on startup and serves predictions.
+The training script loads the movie reviews CSV, preprocesses the text, extracts features, trains on the data, and saves the model + extractor to `models/`. The API loads those artifacts on startup and serves predictions.
 
 ## Table of Contents
 

@@ -48,8 +48,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/sentiment-analysis-project"
-Repository = "https://github.com/yourusername/sentiment-analysis-project"
+Homepage = "https://github.com/huypq02/sentiment-analysis-project"
+Repository = "https://github.com/huypq02/sentiment-analysis-project"
 
 [project.scripts]
 sentiment-train = "sentimentanalysis.pipeline.training:main"
