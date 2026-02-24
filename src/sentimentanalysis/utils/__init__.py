@@ -11,10 +11,9 @@ __email__ = AUTHOR_EMAIL
 
 from .config import load_config
 from .logger import setup_logging
-from .sentiment_mapper import rating_to_sentiment
+
 
 __all__ = [
     "load_config", 
-    "setup_logging", 
-    "rating_to_sentiment"
+    "setup_logging"
 ]

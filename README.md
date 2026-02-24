@@ -163,20 +163,17 @@ Response:
 ```bash
 curl -X POST http://localhost:8080/predict \
     -H "Content-Type: application/json" \
-    -d '{"text": "These books are too bad!"}'
+    -d '{"text": "The movie are too bad!"}'
 ```
 
 Response:
 
 ```json
 {
-  "text": "These books are too bad!",
-  "rating": 1,
-  "sentiment": "Negative"
+  "text": "The movie are too bad!",
+  "sentiment": "negative"
 }
 ```
-
-Ratings come from the model output (1-5 range). Sentiment is assigned by `rating_to_sentiment()` which maps ratings to "Positive", "Neutral", or "Negative" based on thresholds.
 
 ---
 
@@ -187,7 +184,7 @@ Edit `config/config.yaml` to specify which dataset to load and where to save art
 ```yaml
 dataset:
   raw_dir: "data/raw"
-  file: "book_reviews_sample.csv"
+  file: "movie_reviews_imdb.csv"
 
 models:
   dir: "models"

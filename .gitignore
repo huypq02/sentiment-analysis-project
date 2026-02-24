@@ -22,7 +22,7 @@ notebooks/.ipynb_checkpoints/
 /data/processed/*
 /data/raw/*
 # Allow small sample for testing
-!data/raw/book_reviews_sample.csv
+!data/raw/movie_reviews_imdb.csv
 
 # Logs
 *.log

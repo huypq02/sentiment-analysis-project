@@ -7,5 +7,4 @@ class ReviewRequest(BaseModel):
 
 class ReviewResponse(BaseModel):
     text: str
-    rating: float
     sentiment: str

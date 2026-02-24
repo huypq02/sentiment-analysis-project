@@ -41,7 +41,7 @@ def train(
     :type file_paths: FilePaths
     :param mlflow_tracking: MLflow tracking configuration for experiment logging
     :type mlflow_tracking: MLFlowTracking
-    :return: Tuple containing (model, extractor, feature_test_scaled, y_test, config)
+    :return: Tuple containing (model_wrapper, extractor_wrapper, feature_test_transformed, y_test)
     :rtype: tuple
     """
 
@@ -143,7 +143,7 @@ def train(
 if __name__ == "__main__":
     train(
         data_params=DataParameters(
-            data_path=os.path.join("data", "raw", "book_reviews_10k_tailored.csv")
+            data_path=os.path.join("data", "raw", "movie_reviews_imdb.csv")
         ),
         component_sel=ComponentSelection(
             extractor_name="tfidf",

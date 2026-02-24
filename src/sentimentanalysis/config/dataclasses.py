@@ -10,12 +10,12 @@ class DataParameters:
 
     Attributes:
         data_path (Optional[str]): Path to the dataset file.
-        text_column (str): Name of the column containing text data. Default is 'reviewText'.
-        label_column (str): Name of the column containing labels/targets. Default is 'rating'.
+        text_column (str): Name of the column containing text data. Default is 'review'.
+        label_column (str): Name of the column containing labels/targets. Default is 'sentiment'.
     """
     data_path: Optional[str] = None
-    text_column: str = "reviewText"
-    label_column: str = "rating"
+    text_column: str = "review"
+    label_column: str = "sentiment"
 
 @dataclass
 class ComponentSelection:

@@ -4,7 +4,7 @@ import uvicorn
 import os
 import joblib
 from sentimentanalysis.pipeline import predict, train
-from sentimentanalysis.utils import rating_to_sentiment, load_config
+from sentimentanalysis.utils import load_config
 from sentimentanalysis.config import (
     DataParameters, 
     ComponentSelection,
@@ -87,7 +87,7 @@ async def prediction(request: ReviewRequest):
     
     :param request: Review request containing text to analyze
     :type request: ReviewRequest
-    :return: Prediction response with rating and sentiment
+    :return: Prediction response sentiment
     :rtype: ReviewResponse
     :raises HTTPException: If text is empty or None
     """
@@ -95,14 +95,13 @@ async def prediction(request: ReviewRequest):
     if text is None or text == "":
         raise HTTPException(status_code=400, detail="The text should not be empty or none.")
 
-    rating = predict(
+    sentiment = predict(
         model=model,
         extractor=extractor,
         text=text
     )
-    sentiment = rating_to_sentiment(rating)
 
-    return ReviewResponse(text=text, rating=rating, sentiment=sentiment)
+    return ReviewResponse(text=text, sentiment=sentiment)
 
 
 if __name__ == "__main__":
