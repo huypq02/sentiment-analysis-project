@@ -2,11 +2,11 @@ import os
 import joblib
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split, GridSearchCV
-from src.data import DataLoader, Preprocessor
-from src.features import ExtractorFactory
-from src.models import ModelFactory
-from src.utils import load_config, setup_logging
-from src.config import (
+from sentimentanalysis.data import DataLoader, Preprocessor
+from sentimentanalysis.features import ExtractorFactory
+from sentimentanalysis.models import ModelFactory
+from sentimentanalysis.utils import load_config, setup_logging
+from sentimentanalysis.config import (
     DataParameters, 
     ComponentSelection,
     Hyperparameters,

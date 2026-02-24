@@ -1,4 +1,4 @@
-from src.data import Preprocessor
+from sentimentanalysis.data import Preprocessor
 
 
 class SentimentPipeline:
