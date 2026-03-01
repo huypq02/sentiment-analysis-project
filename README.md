@@ -49,12 +49,12 @@ uvicorn sentimentanalysis.app.main:app --host 0.0.0.0 --port 8080
 PowerShell:
 
 ```powershell
-curl -X POST "http://localhost:8080/predictions" `
+curl -X POST "http://localhost:8080/v1/predictions" `
   -H "Content-Type: application/json" `
   -d '{"text":"The movie was terrible and I hated it"}'
 ```
 
-The training script loads the movie reviews CSV, preprocesses the text, extracts features, trains on the data, and saves the model + extractor to `models/`. The API loads those artifacts on startup and serves predictions.
+The training script loads the movie reviews CSV, preprocesses the text, extracts features, trains on the data, and saves the model + extractor to `models/`. The API loads those artifacts on startup and serves predictions via versioned routes (e.g., `/v1/predictions`).
 
 ---
 
@@ -186,7 +186,7 @@ coverage html
 ### Health Check
 
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:8080/v1/health
 ```
 
 Response:
@@ -202,7 +202,7 @@ Response:
 ### Predict
 
 ```bash
-curl -X POST http://localhost:8080/predict \
+curl -X POST http://localhost:8080/v1/predictions \
     -H "Content-Type: application/json" \
     -d '{"text": "The movie are too bad!"}'
 ```
@@ -270,7 +270,7 @@ The `training.py` script reads this config, loads the CSV, trains, and saves. To
     ```
 
 - **404 on prediction endpoint**
-  - Use `POST /predictions` (not `/predict`).
+  - Use `POST /v1/predictions` (not `/predict` or `/predictions`).
 
 ---
 

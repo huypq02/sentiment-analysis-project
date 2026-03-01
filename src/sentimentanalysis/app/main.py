@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException
 import uvicorn
 import os
 import joblib
@@ -62,10 +62,10 @@ async def lifespan(app: FastAPI):
     load_artifact()
     yield
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
+router = APIRouter(prefix="/v1", lifespan=lifespan)
 
-
-@app.get("/health")
+@router.get("/health")
 def health_check():
     """
     Health check endpoint to verify service status.
@@ -80,7 +80,7 @@ def health_check():
     }
 
 
-@app.post("/predictions")
+@router.post("/predictions")
 async def prediction(request: ReviewRequest):
     """
     Predict sentiment for the provided review text.
@@ -102,6 +102,8 @@ async def prediction(request: ReviewRequest):
     )
 
     return ReviewResponse(text=text, sentiment=sentiment)
+
+app.include_router(router)
 
 
 if __name__ == "__main__":
