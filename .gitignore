@@ -14,10 +14,6 @@ dist/
 .ipynb_checkpoints/
 notebooks/.ipynb_checkpoints/
 
-# Model files
-/models/*
-!models/*.txt
-
 # Data
 /data/processed/*
 /data/raw/*
