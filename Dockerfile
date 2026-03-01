@@ -1,15 +1,15 @@
 FROM python:3.13
 WORKDIR /usr/local/app/sentimentanalysis
 
-# Install package in editable mode
-COPY pyproject.toml ./
-COPY README.md ./
-RUN pip install -e .
-
-# Copy in the source code
+# Copy source code and config first (required by pyproject.toml)
 COPY src ./src
 COPY config ./config
 COPY data ./data
+COPY README.md ./
+
+# Install package and dependencies in editable mode
+COPY pyproject.toml ./
+RUN pip install -e .
 
 EXPOSE 8080
 
