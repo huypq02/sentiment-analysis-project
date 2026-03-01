@@ -4,32 +4,57 @@ A working ML pipeline for sentiment classification. Loads reviews, cleans text, 
 
 Built to be testable and actually runnable, not a tutorial.
 
+## Table of Contents
+
+1.  [Quick Start](#quick-start)
+2.  [Why This Structure](#why-this-structure)
+3.  [What's Inside](#whats-inside)
+4.  [How It Works](#how-it-works)
+5.  [Running Tests](#running-tests)
+6.  [API Endpoints](#api-endpoints)
+7.  [Configuration](#configuration)
+8.  [Notes](#notes)
+9.  [Troubleshooting](#troubleshooting)
+10. [License](#license)
+
 ## Quick Start
+
+### 1) Install dependencies
+
+```bash
+pip install -e .
+```
+
+This installs the package in editable mode. Alternatively, if you prefer not to install the package:
 
 ```bash
 pip install -r requirements.txt
-python src/pipeline/training.py
+export PYTHONPATH=src  # On Windows: set PYTHONPATH=src
+```
 
-# Start the API
-uvicorn src.app.main:app --host 0.0.0.0 --port 8080
+### 2) Train the model
 
-# Make a prediction
-curl -X POST http://localhost:8080/predict \
-    -H "Content-Type: application/json" \
-    -d '{"text":"The movie was terrible and I hated it"}'
+```bash
+python -m sentimentanalysis.pipeline.training
+```
+
+### 3) Start the API
+
+```bash
+uvicorn sentimentanalysis.app.main:app --host 0.0.0.0 --port 8080
+```
+
+### 4) Make a prediction
+
+PowerShell:
+
+```powershell
+curl -X POST "http://localhost:8080/predictions" `
+  -H "Content-Type: application/json" `
+  -d '{"text":"The movie was terrible and I hated it"}'
 ```
 
 The training script loads the movie reviews CSV, preprocesses the text, extracts features, trains on the data, and saves the model + extractor to `models/`. The API loads those artifacts on startup and serves predictions.
-
-## Table of Contents
-
-1. [Why This Structure](#why-this-structure)
-2. [What's Inside](#whats-inside)
-3. [How It Works](#how-it-works)
-4. [Running Tests](#running-tests)
-5. [API Endpoints](#api-endpoints)
-6. [Configuration](#configuration)
-7. [Extending It](#extending-it)
 
 ---
 
@@ -50,47 +75,63 @@ Configuration tells the system which components to use. Unit tests guard against
 
 ```
 sentiment-analysis-project/
-│
-├── src/
-│   ├── data/
-│   │   ├── data_loader.py         # Reads CSV
-│   │   └── preprocessor.py        # Lowercase, remove punctuation, tokenize, drop stopwords
-│   ├── features/
+├── src/sentimentanalysis/
+│   ├── app/                      # FastAPI application
+│   │   ├── main.py
+│   │   ├── schemas.py
+│   │   └── __init__.py
+│   ├── config/                   # Configuration management
+│   │   ├── constants.py
+│   │   ├── dataclasses.py
+│   │   └── __init__.py
+│   ├── data/                     # Data loading & preprocessing
+│   │   ├── data_loader.py
+│   │   ├── preprocessor.py
+│   │   └── __init__.py
+│   ├── features/                 # Feature extraction (TF-IDF, BoW)
 │   │   ├── base_feature_extractor.py
-│   │   ├── bow_extractor.py       # Bag-of-Words
-│   │   └── tfidf_extractor.py     # TF-IDF (currently used)
-│   ├── models/
-│   │   ├── model_interface.py     # Abstract base
-│   │   ├── naive_bayes_model.py   # MultinomialNB
-│   │   └── logreg_model.py        # LogisticRegression
-│   ├── pipeline/
-│   │   ├── training.py            # Load → Preprocess → Extract → Train → Save
-│   │   ├── prediction.py          # Load model → Preprocess → Extract → Predict
-│   │   └── evaluation.py          # Compute metrics
-│   ├── app/
-│   │   ├── main.py                # FastAPI server
-│   │   └── schemas.py             # Pydantic models
-│   └── utils/
-│       ├── logger.py
-│       └── load_config.py
-│
-├── tests/
+│   │   ├── bow_extractor.py
+│   │   ├── tfidf_extractor.py
+│   │   ├── factory.py
+│   │   └── __init__.py
+│   ├── models/                   # ML models (LogReg, Naive Bayes)
+│   │   ├── model_interface.py
+│   │   ├── logreg_model.py
+│   │   ├── naive_bayes_model.py
+│   │   ├── factory.py
+│   │   └── __init__.py
+│   ├── pipeline/                 # Training & prediction pipelines
+│   │   ├── training.py
+│   │   ├── prediction.py
+│   │   ├── sentiment_pipeline.py
+│   │   ├── evaluation.py
+│   │   └── __init__.py
+│   ├── utils/                    # Utilities
+│   │   ├── config.py
+│   │   ├── logger.py
+│   │   └── __init__.py
+│   └── __init__.py
+├── tests/                        # Unit tests
 │   ├── test_preprocessor.py
 │   ├── test_feature_extractor.py
 │   ├── test_model.py
-│   └── test_pipeline.py
-│
-├── config/
-│   └── config.yaml                # Points to data, model paths, selects components
-│
-├── data/
-│   ├── raw/                       # CSVs go here
-│   └── processed/                 # Cleaned data (if needed)
-│
-├── models/                        # Trained artifacts
-├── requirements.txt
-├── Dockerfile
-└── README.md
+│   ├── test_pipeline.py
+│   └── __init__.py
+├── config/                       # Configuration files
+│   └── config.yaml
+├── data/                         # Data directory
+│   ├── raw/                      # Raw data (CSVs, etc.)
+│   └── processed/                # Processed data
+├── models/                       # Trained model artifacts
+├── notebooks/                    # Jupyter notebooks (optional)
+├── experiments/                  # Experiment scripts
+├── mlops/                        # MLOps utilities
+├── Dockerfile                    # Docker configuration
+├── Makefile                      # Build automation
+├── pyproject.toml                # Python package config
+├── requirements.txt              # Dependencies
+├── LICENSE                       # MIT License
+└── README.md                     # This file
 ```
 
 ---
@@ -196,74 +237,43 @@ The `training.py` script reads this config, loads the CSV, trains, and saves. To
 
 ---
 
-## Extending It
-
-### Add a New Feature Extractor
-
-1. Create `src/features/word2vec_extractor.py`
-2. Subclass `BaseFeatureExtractor` and implement `fit()` and `transform()`
-3. Add it to the extractor factory
-4. Update training script to use it
-
-```python
-from sentimentanalysis.features.base_feature_extractor import BaseFeatureExtractor
-
-class Word2VecExtractor(BaseFeatureExtractor):
-    def fit(self, sentences):
-        # Train Word2Vec on sentences
-        pass
-
-    def transform(self, sentences):
-        # Return vectors
-        pass
-```
-
-### Add a New Model
-
-1. Create `src/models/svm_model.py`
-2. Subclass `SentimentModel` and implement `train()`, `predict()`, `evaluate()`
-3. Add it to the model factory
-4. Update training script to use it
-
-The pipeline stays the same. Both training and prediction flow through the same orchestration—no changes needed.
-
----
-
 ## Notes
 
-- **Sparse matrices**: Feature extractors return sparse matrices. Make sure models can handle them. Naive Bayes uses `StandardScaler(with_mean=False)` for this reason.
-- **Stopwords**: Negation words are kept intentionally because they flip sentiment. The preprocessor removes English stopwords _except_ negations.
-- **Persistence**: Models and extractors are saved as pickle files. If you change code, old pickles won't deserialize correctly.
-- **Logging**: Each module has a logger. Output goes to console; can be redirected to files if needed.
+- Prefer module execution (`python -m sentimentanalysis...`) over direct file paths.
+- API import path is `sentimentanalysis.app.main:app`.
+- Model and extractor artifact locations are controlled by `config/config.yaml`.
+- For clean imports, install in editable mode: `pip install -e .`. Alternatively, set `PYTHONPATH=src` and run from the project root.
 
 ---
 
-## Performance
+## Troubleshooting
 
-On the sample data, typical results:
+- **Port already in use (`[Errno 10048]`)**
+  - Another process is using port `8080`.
+  - Start API on a different port:
 
-- TF-IDF + LogReg: ~85–90% accuracy
-- Bag-of-Words + Naive Bayes: ~80–85% accuracy
+    ```bash
+    uvicorn sentimentanalysis.app.main:app --host 0.0.0.0 --port 8081
+    ```
 
-Metrics are logged to `models/metrics.txt` after each training run.
+- **`ModuleNotFoundError: No module named 'sentimentanalysis'`**
+  - Install the package in editable mode:
+
+    ```bash
+    pip install -e .
+    ```
+
+  - Or, run from the project root and set `PYTHONPATH`:
+
+    ```bash
+    export PYTHONPATH=src  # On Windows: set PYTHONPATH=src
+    ```
+
+- **404 on prediction endpoint**
+  - Use `POST /predictions` (not `/predict`).
 
 ---
 
-## Deployment
+## License
 
-### Local
-
-```bash
-uvicorn src.app.main:app --host 0.0.0.0 --port 8080
-```
-
-### Docker
-
-```bash
-docker build -t sentiment-analyzer .
-docker run -p 8080:8080 sentiment-analyzer
-```
-
----
-
-That's it. No hidden magic, no sprawling config files. The code does what it says it does.
+MIT License. See LICENSE for details.
