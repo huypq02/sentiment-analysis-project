@@ -62,8 +62,8 @@ async def lifespan(app: FastAPI):
     load_artifact()
     yield
 
-app = FastAPI()
-router = APIRouter(prefix="/v1", lifespan=lifespan)
+app = FastAPI(lifespan=lifespan)
+router = APIRouter(prefix="/v1")
 
 @router.get("/health")
 def health_check():
