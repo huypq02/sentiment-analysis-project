@@ -1,296 +1,279 @@
-# Sentiment Analysis of Product Reviews — Modular ML/NLP Project
+# Sentiment Analysis of Product Reviews
 
-## Project Description
+A working ML pipeline for sentiment classification. Loads reviews, cleans text, extracts features with TF-IDF or Bag-of-Words, trains a classifier (Logistic Regression or Naive Bayes), and serves predictions via FastAPI. Swappable components throughout so you can try different feature extractors and models without touching the core pipeline logic.
 
-This project builds a robust sentiment classification system for product reviews using Python, ML, and NLP. It features a modular, extensible architecture based on the **Strategy Design Pattern**, enabling rapid experimentation and easy deployment of multiple models and feature extractors. The project is designed to be production-ready for large organizations and is an excellent learning resource for ML engineers.
-
----
+Built to be testable and actually runnable, not a tutorial.
 
 ## Table of Contents
 
-1. [Objectives](#objectives)
-2. [Project Structure](#project-structure)
-3. [Requirements](#requirements)
-4. [How It Works](#how-it-works)
-5. [Testing](#testing)
-6. [API Usage (FastAPI)](#api-usage-fastapi)
-7. [Hands-On Roadmap](#hands-on-roadmap)
-8. [Theory & Best Practices](#theory--best-practices)
-9. [Evaluation & Metrics](#evaluation--metrics)
-10. [Deployment & MLOps](#deployment--mlops)
-11. [References & Further Study](#references--further-study)
+1.  [Quick Start](#quick-start)
+2.  [Why This Structure](#why-this-structure)
+3.  [What's Inside](#whats-inside)
+4.  [How It Works](#how-it-works)
+5.  [Running Tests](#running-tests)
+6.  [API Endpoints](#api-endpoints)
+7.  [Configuration](#configuration)
+8.  [Notes](#notes)
+9.  [Troubleshooting](#troubleshooting)
+10. [License](#license)
 
----
+## Quick Start
 
-## Objectives
+### 1) Install dependencies
 
-- **Build** a sentiment classifier for product reviews (positive/negative).
-- **Apply** ML and NLP techniques for real-world text data.
-- **Use** the Strategy Pattern to easily swap models and feature extraction methods.
-- **Structure** code professionally for team use, maintenance, and deployment.
-- **Learn** end-to-end ML engineering: theory → code → evaluation → deployment.
-
----
-
-## Project Structure
-
-```
-sentiment_analysis_project/
-│
-├── config/            # YAML/JSON for model, feature, data configs
-├── data/              # raw/processed/external datasets
-├── models/            # trained model artifacts (.pkl, .pt, etc.)
-├── notebooks/         # ⚠️ IN PREPARATION: Jupyter notebooks for EDA, prototyping (not yet implemented)
-├── src/
-│   ├── data/          # loaders, preprocessors
-│   ├── features/      # base & concrete feature extractors (Strategy Pattern)
-│   ├── models/        # base & concrete models (Strategy Pattern)
-│   ├── pipeline/      # context (SentimentPipeline), train/inference pipelines
-│   ├── utils/         # metrics, visualization, logging
-│   └── app/           # FastAPI/Streamlit serving
-├── tests/             # unit/integration tests
-├── requirements.txt   # dependencies
-├── Makefile           # build/test/run commands
-├── README.md          # this documentation
-└── .gitignore
+```bash
+pip install -e .
 ```
 
+This installs the package in editable mode. Alternatively, if you prefer not to install the package:
+
+```bash
+pip install -r requirements.txt
+export PYTHONPATH=src  # On Windows: set PYTHONPATH=src
+```
+
+### 2) Train the model
+
+```bash
+python -m sentimentanalysis.pipeline.training
+```
+
+### 3) Start the API
+
+```bash
+uvicorn sentimentanalysis.app.main:app --host 0.0.0.0 --port 8080
+```
+
+### 4) Make a prediction
+
+PowerShell:
+
+```powershell
+curl -X POST "http://localhost:8080/v1/predictions" `
+  -H "Content-Type: application/json" `
+  -d '{"text":"The movie was terrible and I hated it"}'
+```
+
+The training script loads the movie reviews CSV, preprocesses the text, extracts features, trains on the data, and saves the model + extractor to `models/`. The API loads those artifacts on startup and serves predictions via versioned routes (e.g., `/v1/predictions`).
+
 ---
 
-## Requirements
+## Why This Structure
 
-### Technical
+The main goal: I want to swap TF-IDF for Bag-of-Words, or swap Logistic Regression for Naive Bayes, without touching the actual pipeline orchestration code. Everything that can vary lives in one of four layers:
 
-- **Python 3.8+**
-- **Libraries:** numpy, pandas, scikit-learn, matplotlib, (optional: PyTorch/TensorFlow for advanced models), nltk/spacy for NLP
-- **OOP:** Use abstract base classes for all strategies (models, feature extraction)
-- **Config:** Centralize all parameters in config files
-- **Data:** Product reviews, labeled positive/negative (csv, json, etc.)
+- **Data layer**: Loads CSVs, handles columns
+- **Feature layer**: TF-IDF, Bag-of-Words (add more)
+- **Model layer**: LogReg, Naive Bayes (add more)
+- **Pipeline layer**: Orchestrates everything
 
-### ML/NLP
+Configuration tells the system which components to use. Unit tests guard against breakage when I refactor. The API is thin and just calls the pipeline.
 
-- **Text Preprocessing:** Cleaning, tokenization, stopword removal
-- **Feature Extraction:** TF-IDF, Bag-of-Words, Word2Vec, BERT (extensible)
-- **Models:** Naive Bayes, SVM, Logistic Regression, Random Forest, (optional: Deep Learning)
-- **Evaluation:** Accuracy, Precision, Recall, F1-score, Confusion Matrix
-- **Strategy Pattern:** Easily swap algorithms and feature extractors
+---
 
-### Engineering
+## What's Inside
 
-- **Testing:** Unit tests for every module
-- **Artifact Management:** Save/load trained models
-- **API/UI:** Serve predictions via FastAPI or Streamlit
-- **Extensibility:** Add new strategies with minimal code changes
-- **Versioning:** Use .gitignore for data/models; code tracked in git
+```
+sentiment-analysis-project/
+├── src/sentimentanalysis/
+│   ├── app/                      # FastAPI application
+│   │   ├── main.py
+│   │   ├── schemas.py
+│   │   └── __init__.py
+│   ├── config/                   # Configuration management
+│   │   ├── constants.py
+│   │   ├── dataclasses.py
+│   │   └── __init__.py
+│   ├── data/                     # Data loading & preprocessing
+│   │   ├── data_loader.py
+│   │   ├── preprocessor.py
+│   │   └── __init__.py
+│   ├── features/                 # Feature extraction (TF-IDF, BoW)
+│   │   ├── base_feature_extractor.py
+│   │   ├── bow_extractor.py
+│   │   ├── tfidf_extractor.py
+│   │   ├── factory.py
+│   │   └── __init__.py
+│   ├── models/                   # ML models (LogReg, Naive Bayes)
+│   │   ├── model_interface.py
+│   │   ├── logreg_model.py
+│   │   ├── naive_bayes_model.py
+│   │   ├── factory.py
+│   │   └── __init__.py
+│   ├── pipeline/                 # Training & prediction pipelines
+│   │   ├── training.py
+│   │   ├── prediction.py
+│   │   ├── sentiment_pipeline.py
+│   │   ├── evaluation.py
+│   │   └── __init__.py
+│   ├── utils/                    # Utilities
+│   │   ├── config.py
+│   │   ├── logger.py
+│   │   └── __init__.py
+│   └── __init__.py
+├── tests/                        # Unit tests
+│   ├── test_preprocessor.py
+│   ├── test_feature_extractor.py
+│   ├── test_model.py
+│   ├── test_pipeline.py
+│   └── __init__.py
+├── config/                       # Configuration files
+│   └── config.yaml
+├── data/                         # Data directory
+│   ├── raw/                      # Raw data (CSVs, etc.)
+│   └── processed/                # Processed data
+├── models/                       # Trained model artifacts
+├── notebooks/                    # Jupyter notebooks (optional)
+├── experiments/                  # Experiment scripts
+├── mlops/                        # MLOps utilities
+├── Dockerfile                    # Docker configuration
+├── Makefile                      # Build automation
+├── pyproject.toml                # Python package config
+├── requirements.txt              # Dependencies
+├── LICENSE                       # MIT License
+└── README.md                     # This file
+```
 
 ---
 
 ## How It Works
 
-1. **Data Loading:** Load product reviews from `data/raw/`.
-2. **Preprocessing:** Clean and tokenize text (see `src/data/preprocessor.py`).
-3. **Feature Extraction:** Select and apply feature extraction strategy (`src/features/`).
-4. **Model Training:** Choose and train classifier strategy (`src/models/`).
-5. **Evaluation:** Compute metrics on test set (`src/pipeline/evaluation.py`).
-6. **Inference:** Predict sentiment for new reviews using trained model.
-7. **Serving:** Expose model via API/UI (`src/app/`).
+```
+Raw CSV → Preprocess → Feature Extract → Train → Evaluate → Serve
+  ↓          ↓              ↓              ↓       ↓         ↓
+Reviews  Tokenize       TF-IDF or      LogReg  Metrics  REST API
+         + stopwords    Bag-of-Words   or NB   (F1, etc)
+         remove negs
+```
+
+**Negation handling**: I keep words like "not", "never", "don't" in the text because sentiment depends on them. A preprocessing step removes normal English stopwords _except_ negations.
+
+**Feature extraction**: Both TF-IDF and Bag-of-Words return sparse matrices (mostly zeros). Naive Bayes uses `StandardScaler(with_mean=False)` to handle sparse data without trying to center it.
+
+**Training flow**:
+
+1. Load the CSV
+2. Preprocess text (tokenize, remove stopwords except negations)
+3. 80/20 train-test split
+4. Fit the feature extractor on train data
+5. Transform both train and test
+6. Train the model
+7. Evaluate on test set
+8. Save model + extractor as pickle files
+
+The API loads those pickle files on startup and uses them for inference.
 
 ---
 
-## Testing
+## Running Tests
 
-The project includes comprehensive unit tests to ensure code quality and reliability. All tests are located in the `tests/` directory and use Python's built-in `unittest` framework.
-
-### Available Test Modules
-
-- **`test_preprocessor.py`** - Tests for text preprocessing and cleaning
-- **`test_feature_extractor.py`** - Tests for feature extraction strategies (TF-IDF, BoW, etc.)
-- **`test_model.py`** - Tests for model implementations and training
-- **`test_pipeline.py`** - Tests for end-to-end pipeline workflows
-
-### Running Tests
-
-#### Run All Tests
+Basic unit tests using unittest. They check that preprocessing works, feature extraction returns the right shapes, and models can be trained/evaluated. All use dummy data and are quick.
 
 ```bash
-# Using unittest discovery (from project root)
-python -m unittest discover -s tests -p "test_*.py" -v
-
-# Or simply
 python -m unittest discover tests -v
-```
-
-#### Run Specific Test Files
-
-```bash
-# Test only the preprocessor
-python -m unittest tests.test_preprocessor -v
-
-# Test only feature extractors
-python -m unittest tests.test_feature_extractor -v
-
-# Test only models
 python -m unittest tests.test_model -v
 
-# Test only pipeline
-python -m unittest tests.test_pipeline -v
-```
-
-#### Run Specific Test Classes or Methods
-
-```bash
-# Run a specific test class
-python -m unittest tests.test_preprocessor.TestPreprocessor -v
-
-# Run a specific test method
-python -m unittest tests.test_preprocessor.TestPreprocessor.test_remove_punctuation -v
-```
-
-### Running Tests with Coverage
-
-```bash
-# Install coverage tool
-pip install coverage
-
-# Run tests with coverage
+# With coverage
 coverage run -m unittest discover tests -v
-
-# View coverage report in terminal
 coverage report
-
-# Generate HTML coverage report
 coverage html
 ```
 
-Open `htmlcov/index.html` in your browser to view the detailed coverage report.
+---
 
-### Testing Best Practices
+## API Endpoints
 
-1. **Run tests before committing:** Always run the full test suite before pushing code
-2. **Write tests for new features:** Add corresponding tests in `tests/` when adding new functionality
-3. **Check coverage:** Aim for >80% code coverage using the coverage tool
-4. **Use setUp/tearDown:** Leverage unittest's setUp and tearDown methods for reusable test fixtures
-5. **Test edge cases:** Include tests for invalid inputs, empty data, and boundary conditions
-6. **Follow naming conventions:** Test files should start with `test_`, test methods should start with `test_`
+### Health Check
 
-### Continuous Integration
+```bash
+curl http://localhost:8080/v1/health
+```
 
-Tests are automatically run on every push/PR via GitHub Actions. Check the `.github/workflows/` directory for CI configuration.
+Response:
+
+```json
+{
+  "status": "healthy",
+  "service": "Sentiment Analysis API",
+  "version": "1.2.0"
+}
+```
+
+### Predict
+
+```bash
+curl -X POST http://localhost:8080/v1/predictions \
+    -H "Content-Type: application/json" \
+    -d '{"text": "The movie are too bad!"}'
+```
+
+Response:
+
+```json
+{
+  "text": "The movie are too bad!",
+  "sentiment": "negative"
+}
+```
 
 ---
 
-## API Usage (FastAPI)
+## Configuration
 
-The FastAPI service is implemented in `src/app/main.py` and runs on port **8080**.
+Edit `config/config.yaml` to specify which dataset to load and where to save artifacts:
 
-### Run locally
+```yaml
+dataset:
+  raw_dir: "data/raw"
+  file: "movie_reviews_imdb.csv"
 
-- Run via Uvicorn:
-  - `uvicorn src.app.main:app --host 0.0.0.0 --port 8080`
-- Or run the module directly:
-  - `python -m src.app.main`
+models:
+  dir: "models"
+  model: "models/sentiment_logreg.pkl"
+  extractor: "models/tfidf_extractor.pkl"
+```
 
-### Endpoints
-
-#### `GET /health`
-
-- Example:
-  - `curl http://localhost:8080/health`
-- Response:
-  - `{"status":"healthy","service":"Sentiment Analysis API","version":"1.1.2"}`
-
-#### `POST /predict`
-
-- Request schema:
-  - `{"text": "review text"}`
-- Example:
-  - `curl -X POST http://localhost:8080/predict -H "Content-Type: application/json" -d "{\"text\":\"This product is amazing!\"}"`
-- Response schema:
-  - `{"text": "review text", "rating": <score>, "sentiment": "<Positive|Neutral|Negative>"}`
-
-Sentiment thresholds:
-
-- Positive: rating ≥ 4
-- Neutral: rating = 3
-- Negative: rating ≤ 2
-
-### Schemas
-
-Request/response schemas are defined in `src/app/schemas.py`:
-
-- `ReviewRequest(text: str)`
-- `ReviewResponse(text: str, rating: float, sentiment: str)`
+The `training.py` script reads this config, loads the CSV, trains, and saves. To swap between TF-IDF and Bag-of-Words, or between LogReg and Naive Bayes, you'd modify the factory calls in `training.py` or refactor to make it config-driven.
 
 ---
 
-## Hands-On Roadmap
+## Notes
 
-> **📝 NOTE:** The notebooks referenced below are currently **IN PREPARATION** and have not been implemented yet. The exploratory data analysis and prototyping notebooks will be added in future iterations.
-
-| Step | Concept             | Action                                    | Reference                                                                                                  |
-| ---- | ------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| 1    | **Theory**          | Understand sentiment analysis & ML basics | [SuperDataScience](https://www.superdatascience.com/blogs/the-ultimate-guide-to-regression-classification) |
-| 2    | **Data**            | Explore/clean sample reviews in notebooks | `notebooks/01_data_exploration.ipynb`                                                                      |
-| 3    | **OOP Design**      | Implement base & concrete strategies      | `src/features/base_feature_extractor.py`, `src/models/model_interface.py`                                  |
-| 4    | **Modeling**        | Train/evaluate multiple classifiers       | `src/pipeline/train_pipeline.py`                                                                           |
-| 5    | **Testing**         | Run unit tests to verify implementation   | `python -m unittest discover tests -v` (see [Testing](#testing) section)                                   |
-| 6    | **Metrics**         | Visualize confusion matrix, F1, etc.      | `src/utils/metrics.py`                                                                                     |
-| 7    | **Deployment**      | Serve model via API/UI                    | `src/app/`                                                                                                 |
-| 8    | **Experimentation** | Swap strategies, tune hyperparameters     | `config/`                                                                                                  |
+- Prefer module execution (`python -m sentimentanalysis...`) over direct file paths.
+- API import path is `sentimentanalysis.app.main:app`.
+- Model and extractor artifact locations are controlled by `config/config.yaml`.
+- For clean imports, install in editable mode: `pip install -e .`. Alternatively, set `PYTHONPATH=src` and run from the project root.
 
 ---
 
-## Theory & Best Practices
+## Troubleshooting
 
-- **Strategy Pattern:** Define abstract base classes (interfaces) for feature extraction and models; implement concrete strategies; context (pipeline) manages strategy selection and execution.
-- **ML Pipeline:** Data loading → preprocessing → feature engineering → modeling → evaluation → deployment.
-- **Trade-offs:** Model complexity vs. interpretability, training time vs. accuracy, data requirements vs. overfitting.
-- **Extensibility:** Add new strategies in `src/features/` or `src/models/` without changing the pipeline.
+- **Port already in use (`[Errno 10048]`)**
+  - Another process is using port `8080`.
+  - Start API on a different port:
 
----
+    ```bash
+    uvicorn sentimentanalysis.app.main:app --host 0.0.0.0 --port 8081
+    ```
 
-## Evaluation & Metrics
+- **`ModuleNotFoundError: No module named 'sentimentanalysis'`**
+  - Install the package in editable mode:
 
-- **Accuracy:** % of correct predictions.
-- **Precision/Recall/F1:** Especially important for imbalanced datasets.
-- **Confusion Matrix:** Visual breakdown of true/false positives/negatives.
-- **Custom Metrics:** (Optional) ROC-AUC, PR curves.
+    ```bash
+    pip install -e .
+    ```
 
----
+  - Or, run from the project root and set `PYTHONPATH`:
 
-## Deployment & MLOps
+    ```bash
+    export PYTHONPATH=src  # On Windows: set PYTHONPATH=src
+    ```
 
-- **Artifact Management:** Save/load models in `models/`; use config for reproducible runs.
-- **API Serving:** FastAPI app available in `src/app/` with `/health` and `/predict`.
-- **CI/CD:** GitHub Actions workflows for CI (lint + tests + optional Docker build) and CD (deploy on Render after CI success).
-- **Testing:** Run unit/integration tests in `tests/` before deployment.
-- **Versioning:** Track code in git, data/models in .gitignore.
-
----
-
-## References & Further Study
-
-- [Strategy Pattern in Python](https://refactoring.guru/design-patterns/strategy/python/example)
-- [Cookiecutter Data Science Project Structure](https://drivendata.github.io/cookiecutter-data-science/)
-- [Structuring ML Projects (Andrew Ng)](https://www.deeplearning.ai/short-courses/structuring-machine-learning-projects/)
-- [SuperDataScience: Regression vs Classification](https://www.superdatascience.com/blogs/the-ultimate-guide-to-regression-classification)
-- [Neural Networks & Deep Learning (Michael Nielsen)](http://neuralnetworksanddeeplearning.com/chap1)
-- [SVM Kernel Functions](https://data-flair.training/blogs/svm-kernel-functions/)
+- **404 on prediction endpoint**
+  - Use `POST /v1/predictions` (not `/predict` or `/predictions`).
 
 ---
 
-## Author & Mentorship
+## License
 
-This project is guided by a mentor with 10+ years of experience in ML, NLP, and production AI, following a logical, scientific, intuitive, and hands-on teaching style.  
-For questions, guidance, or code reviews, open an issue or discussion.
-
----
-
-> **⚠️ CURRENT PROJECT STATUS:**
->
-> - ✅ Core ML pipeline architecture implemented
-> - 🚧 Notebooks for EDA and prototyping: **IN PREPARATION**
-> - ✅ CI/CD pipeline (GitHub Actions + Render deploy hook)
-> - ✅ API serving layer (FastAPI)
-
-**Ready to get started? Clone this repo and dive into `src/` for the modular ML engineering foundation. Notebooks and deployment features coming soon!**
+MIT License. See LICENSE for details.

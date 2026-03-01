@@ -1,8 +1,21 @@
-Confusion Matrix:
-[[4 1 1 1 0]
- [1 0 0 0 0]
- [0 1 0 1 0]
- [0 1 1 2 1]
- [1 0 0 3 1]]
+=== Model Evaluation Results ===
 
-Accuracy Score: 0.35
+Accuracy: 0.8920
+Precision (macro): 0.8920
+Recall (macro): 0.8920
+F1 Score (macro): 0.8920
+F1 Score (weighted): 0.8920
+
+Confusion Matrix:
+[[4460  575]
+ [ 505 4460]]
+
+Classification Report:
+              precision    recall  f1-score   support
+
+    negative       0.90      0.89      0.89      5035
+    positive       0.89      0.90      0.89      4965
+
+    accuracy                           0.89     10000
+   macro avg       0.89      0.89      0.89     10000
+weighted avg       0.89      0.89      0.89     10000
