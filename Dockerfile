@@ -3,6 +3,7 @@ WORKDIR /usr/local/app/sentimentanalysis
 
 # Install package in editable mode
 COPY pyproject.toml ./
+COPY README.md ./
 RUN pip install -e .
 
 # Copy in the source code
