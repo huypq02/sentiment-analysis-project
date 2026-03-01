@@ -5,11 +5,13 @@ WORKDIR /usr/local/app/sentimentanalysis
 COPY src ./src
 COPY config ./config
 COPY data ./data
+COPY models ./models
 COPY README.md ./
 
 # Install package and dependencies in editable mode
 COPY pyproject.toml ./
-RUN pip install -e .
+RUN pip install -e . && \
+    python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 
 EXPOSE 8080
 
