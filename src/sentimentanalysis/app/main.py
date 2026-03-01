@@ -3,15 +3,9 @@ from fastapi import FastAPI, APIRouter, HTTPException
 import uvicorn
 import os
 import joblib
-from sentimentanalysis.pipeline import predict, train
+from sentimentanalysis.pipeline import predict
 from sentimentanalysis.utils import load_config
 from sentimentanalysis.config import (
-    DataParameters, 
-    ComponentSelection,
-    Hyperparameters,
-    TrainingConfiguration,
-    FilePaths,
-    MLFlowTracking,
     SERVICE_NAME,
     API_VERSION,
     DEFAULT_CONFIG_PATH,
@@ -25,10 +19,12 @@ config = None
 
 def load_artifact():
     """
-    Load trained model and feature extractor from disk or train new ones if not found.
+    Load trained model and feature extractor from disk.
+    Raises an error if models do not exist (training should be run separately).
     
     :return: None
     :rtype: None
+    :raises FileNotFoundError: If trained models are not found
     """
     global model, extractor, config
 
@@ -36,18 +32,14 @@ def load_artifact():
     config = load_config(config_path)
     model_path = config["models"]["model"]
     extractor_path = config["models"]["extractor"]
-    if os.path.exists(model_path) and os.path.exists(extractor_path):
-        model = joblib.load(model_path)
-        extractor = joblib.load(extractor_path)
-    else:
-        model, extractor, _, _, _ = train(
-            data_params=DataParameters(),
-            component_sel=ComponentSelection(),
-            hyperparams=Hyperparameters(),
-            training_conf=TrainingConfiguration(),
-            file_paths=FilePaths(),
-            mlflow_tracking=MLFlowTracking()
-        )
+    
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model not found at {model_path}. Run training first: python -m sentimentanalysis.pipeline.training")
+    if not os.path.exists(extractor_path):
+        raise FileNotFoundError(f"Extractor not found at {extractor_path}. Run training first: python -m sentimentanalysis.pipeline.training")
+    
+    model = joblib.load(model_path)
+    extractor = joblib.load(extractor_path)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
