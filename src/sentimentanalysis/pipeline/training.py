@@ -91,10 +91,17 @@ def train(
             params=hyperparams.model_params
         )
 
-        pipeline = Pipeline([
-            ("extractor", extractor_wrapper.vectorizer),
-            ("model", model_wrapper.classifier)
-        ])
+        if training_conf.feature_scaling:
+            pipeline = Pipeline([
+                ("extractor", extractor_wrapper.vectorizer),
+                ("scaler", model_wrapper.scaler),
+                ("model", model_wrapper.classifier)
+            ], memory=None)  # Optional: Feature scaling
+        else:
+            pipeline = Pipeline([
+                ("extractor", extractor_wrapper.vectorizer),
+                ("model", model_wrapper.classifier)
+            ], memory=None)
 
         # 6. Training pipeline strategy with hyperparmeter fine-tuning
         grid_search = GridSearchCV(
@@ -110,17 +117,15 @@ def train(
         best_model = grid_search.best_estimator_
         model_wrapper.classifier = best_model.named_steps['model']
         extractor_wrapper.vectorizer = best_model.named_steps['extractor']
-        feature_test_transformed = extractor_wrapper.vectorizer.transform(X_test)
-        # if (
-        #     training_conf.feature_scaling
-        # ):
-        #     feature_train_scaled, feature_test_scaled = model.scale_feature(
-        #         feature_train, feature_test
-        #     )  # Feature scaling
-        #     model.train(feature_train_scaled, y_train, parameters)  # Train data on the model
-        # else:
-        #     model.train(feature_train, y_train, parameters)
-        #     feature_test_scaled = feature_test  # Use unscaled features
+        
+        # Extract scaler if feature scaling was used
+        if training_conf.feature_scaling and 'scaler' in best_model.named_steps:
+            model_wrapper.scaler = best_model.named_steps['scaler']
+            # Apply both extractor and scaler transformations
+            feature_test_transformed = extractor_wrapper.vectorizer.transform(X_test)
+            feature_test_transformed = model_wrapper.scaler.transform(feature_test_transformed)
+        else:
+            feature_test_transformed = extractor_wrapper.vectorizer.transform(X_test)
 
     except Exception as e:
         logger.exception(f"Unexpected error in training pipeline: {e}")
