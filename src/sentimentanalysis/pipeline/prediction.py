@@ -39,6 +39,6 @@ def predict(model, extractor, text: str):
 
     except Exception as e:
         logger.exception(f"Unexpected error in prediction pipeline: {e}")
-        return RuntimeError("Prediction failed")
+        raise RuntimeError("Prediction failed")
 
     return predictions[0]
