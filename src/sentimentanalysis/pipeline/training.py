@@ -126,6 +126,8 @@ def train(
             feature_test_transformed = extractor_wrapper.vectorizer.transform(X_test)
             feature_test_transformed = model_wrapper.scaler.transform(feature_test_transformed)
         else:
+            # Explicitly mark scaler as unused so downstream code can skip scaling safely.
+            model_wrapper.scaler = None
             feature_test_transformed = extractor_wrapper.vectorizer.transform(X_test)
 
     except Exception as e:
