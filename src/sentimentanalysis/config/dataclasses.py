@@ -51,10 +51,12 @@ class TrainingConfiguration:
         test_size (float): Proportion of the dataset to include in the test split. Default is 0.2.
         random_state (int): Random seed for reproducibility. Default is 0.
         feature_scaling (bool): Whether to apply feature scaling. Default is False.
+        evaluate_after_training (bool): Whether to evaluate model after training. Default is True.
     """
     test_size: float = 0.2
     random_state: int = 0
     feature_scaling: bool = False
+    evaluate_after_training: bool = True
 
 @dataclass
 class FilePaths:

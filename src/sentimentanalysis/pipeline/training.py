@@ -14,6 +14,7 @@ from sentimentanalysis.config import (
     FilePaths,
     MLFlowTracking
 )
+from .evaluation import evaluate
 
 logger = setup_logging(__name__)
 
@@ -131,7 +132,12 @@ def train(
         logger.exception(f"Unexpected error in training pipeline: {e}")
         raise RuntimeError("Training pipeline failed")
 
-    # 7. Save model and feature extractor
+    # 7. Evaluate model on test set
+    if training_conf.evaluate_after_training:
+        logger.info("Evaluating model on test set...")
+        evaluate(model_wrapper, feature_test_transformed, y_test)
+
+    # 8. Save model and feature extractor
     # Create new folder with the name 'models' if it doesn't exist
     os.makedirs(config["models"]["dir"], exist_ok=True)
 
@@ -143,33 +149,3 @@ def train(
     logger.info("Training pipeline completed")
 
     return model_wrapper, extractor_wrapper, feature_test_transformed, y_test
-
-
-if __name__ == "__main__":
-    train(
-        data_params=DataParameters(
-            data_path=os.path.join("data", "raw", "movie_reviews_imdb.csv")
-        ),
-        component_sel=ComponentSelection(
-            extractor_name="tfidf",
-            model_name="logreg"
-        ),
-        hyperparams=Hyperparameters(
-            param_grid = {
-                "extractor__max_features": [5000, 10000],
-                "extractor__ngram_range": [(1,1), (1,2)],
-                "extractor__min_df": [2, 5],
-                "extractor__max_df": [0.8],
-                "extractor__binary": [False],  # important
-
-                "model__solver": ["lbfgs"],
-                "model__penalty": ["l2"],
-                "model__C": [0.1, 1, 5],
-                "model__class_weight": [None, "balanced"],
-                "model__max_iter": [1000]
-            }
-        ),
-        training_conf=TrainingConfiguration(),
-        file_paths=FilePaths(),
-        mlflow_tracking=MLFlowTracking()
-    )
