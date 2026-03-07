@@ -1,5 +1,4 @@
 import os
-from .training import train
 from sentimentanalysis.utils import load_config, setup_logging
 from sentimentanalysis.config import DEFAULT_CONFIG_PATH
 
@@ -27,11 +26,12 @@ def evaluate(
     try:
         config_path: str = os.environ.get("CONFIG_PATH", DEFAULT_CONFIG_PATH)
         config = load_config(config_path)
-        # 8. Evaluation
-        logger.info("Evaluating...")
+        
+        logger.info("Evaluating model...")
         metrics = evaluate_model.evaluate(feature_test, label_test)
 
-        # 9. Log results
+        # Save results
+        os.makedirs(config["models"]["dir"], exist_ok=True)
         with open(config["models"]["metrics"], "w") as f:
             f.write("=== Model Evaluation Results ===\n\n")
             f.write(f"Accuracy: {metrics['accuracy']:.4f}\n")
@@ -52,47 +52,4 @@ def evaluate(
 
     except Exception as e:
         logger.exception(f"Unexpected error in evaluation: {e}")
-        return RuntimeError("Evaluation failed")
-
-
-if __name__ == "__main__":
-    from sentimentanalysis.config import (
-    DataParameters, 
-    ComponentSelection,
-    Hyperparameters,
-    TrainingConfiguration,
-    FilePaths,
-    MLFlowTracking
-    )
-
-    model, _, feature_test, label_test = train(
-        data_params=DataParameters(),
-        component_sel=ComponentSelection(
-            extractor_name="tfidf",
-            model_name="logreg"
-        ),
-        hyperparams=Hyperparameters(
-            param_grid = {
-                "extractor__max_features": [5000, 10000],
-                "extractor__ngram_range": [(1,1), (1,2)],
-                "extractor__min_df": [2, 5],
-                "extractor__max_df": [0.8],
-                "extractor__binary": [False],
-
-                "model__solver": ["lbfgs"],
-                "model__penalty": ["l2"],
-                "model__C": [0.1, 1, 5],
-                "model__class_weight": [None, "balanced"],
-                "model__max_iter": [1000]
-            }
-        ),
-        training_conf=TrainingConfiguration(),
-        file_paths=FilePaths(),
-        mlflow_tracking=MLFlowTracking()
-    )
-    
-    evaluate(
-        evaluate_model=model,
-        feature_test=feature_test,
-        label_test=label_test
-    )
+        raise RuntimeError("Evaluation failed")
