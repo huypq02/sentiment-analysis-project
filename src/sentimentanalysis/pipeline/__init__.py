@@ -11,7 +11,7 @@ __email__ = AUTHOR_EMAIL
 
 from .training import train
 from .prediction import predict
-from .evaluation import evaluate
+from .evaluation import evaluate, evaluate_saved_model
 from .sentiment_pipeline import SentimentPipeline
 
-__all__ = ["train", "predict", "evaluate", "SentimentPipeline"]
+__all__ = ["train", "predict", "evaluate", "evaluate_saved_model", "SentimentPipeline"]

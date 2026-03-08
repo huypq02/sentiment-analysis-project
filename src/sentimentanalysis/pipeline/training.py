@@ -119,16 +119,18 @@ def train(
         model_wrapper.classifier = best_model.named_steps['model']
         extractor_wrapper.vectorizer = best_model.named_steps['extractor']
         
+        logger.info("Transforming test data...")
+        feature_test_transformed = extractor_wrapper.vectorizer.transform(X_test)
+
         # Extract scaler if feature scaling was used
         if training_conf.feature_scaling and 'scaler' in best_model.named_steps:
+            logger.info("Applying feature scaling...")
             model_wrapper.scaler = best_model.named_steps['scaler']
-            # Apply both extractor and scaler transformations
-            feature_test_transformed = extractor_wrapper.vectorizer.transform(X_test)
+            # Apply scaler transformations
             feature_test_transformed = model_wrapper.scaler.transform(feature_test_transformed)
         else:
             # Explicitly mark scaler as unused so downstream code can skip scaling safely.
             model_wrapper.scaler = None
-            feature_test_transformed = extractor_wrapper.vectorizer.transform(X_test)
 
     except Exception as e:
         logger.exception(f"Unexpected error in training pipeline: {e}")
