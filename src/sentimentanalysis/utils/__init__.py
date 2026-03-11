@@ -3,9 +3,9 @@ Module to initialize the package for sentimentanalysis.utils
 Provides the imports at the package-level.
 """
 
-from sentimentanalysis.config import API_VERSION, AUTHOR_NAME, AUTHOR_EMAIL
+from sentimentanalysis.config import VERSION, AUTHOR_NAME, AUTHOR_EMAIL
 
-__version__ = API_VERSION
+__version__ = VERSION
 __author__ = AUTHOR_NAME
 __email__ = AUTHOR_EMAIL
 

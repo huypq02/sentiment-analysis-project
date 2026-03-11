@@ -1,4 +1,4 @@
-API_VERSION = "v1"
+VERSION = "1.2.1"
 SERVICE_NAME = "Sentiment Analysis API"
 AUTHOR_NAME = "Huy Pham"
 AUTHOR_EMAIL = "huypham0297@gmail.com"
