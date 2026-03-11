@@ -12,7 +12,7 @@ from .dataclasses import (
     MLFlowTracking
 )
 from .constants import (
-    API_VERSION,
+    VERSION,
     SERVICE_NAME,
     AUTHOR_NAME,
     AUTHOR_EMAIL,
@@ -20,7 +20,7 @@ from .constants import (
     DEFAULT_CONFIG_PATH
 )
 
-__version__ = API_VERSION
+__version__ = VERSION
 __author__ = AUTHOR_NAME
 __email__ = AUTHOR_EMAIL
 
@@ -31,7 +31,7 @@ __all__ = [
     "TrainingConfiguration",
     "FilePaths",
     "MLFlowTracking",
-    "API_VERSION",
+    "VERSION",
     "SERVICE_NAME",
     "AUTHOR_NAME",
     "AUTHOR_EMAIL",

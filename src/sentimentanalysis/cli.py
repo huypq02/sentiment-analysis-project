@@ -1,0 +1,93 @@
+import argparse
+from sentimentanalysis import __version__, DEFAULT_CONFIG_PATH
+
+def train_command():
+    print("This is a training command with argument ")
+
+def main():
+    """CLI entry point."""
+    parser = argparse.ArgumentParser(
+        prog="sentimentanalysis",
+        description="Sentiment Analysis CLI - Train, evaluate, and predict sentiment",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Train with defaults
+  %(prog)s train
+  
+  # Train with custom settings
+  %(prog)s train --model logreg --extractor tfidf --feature-scaling
+  
+  # Evaluate saved model
+  %(prog)s evaluate
+  
+  # Make a prediction
+  %(prog)s predict "This movie is amazing!"
+  
+  # Show version
+  %(prog)s --version
+
+For more information, visit: https://github.com/huypq02/sentiment-analysis-project
+"""
+    )
+
+    parser.add_argument("-v", "--version", 
+                        action="version", 
+                        version=f"%(prog)s {__version__}")
+
+    subparsers = parser.add_subparsers(dest="command", 
+                                       description="valid subcommands",
+                                       help="additional help")
+    # Train commands
+    train_parser = subparsers.add_parser("train", 
+                                         help="Train model",
+                                         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    train_parser.add_argument("--config", 
+                              help="configuration path", 
+                              default=DEFAULT_CONFIG_PATH)
+    train_parser.add_argument("--model", 
+                              choices=("logreg", "naive_bayes"), 
+                              help="Model types", default="logreg")
+    train_parser.add_argument("--extractor", 
+                              choices=("tfidf", "bow"), 
+                              help="Feature extractor types", default="tfidf")
+    train_parser.add_argument("--test-size",
+                              type=float,
+                              help="Test size for training model",
+                              default=0.2)
+    train_parser.add_argument("--random-state",
+                              type=int,
+                              help="Random state for training model",
+                              default=0)
+    train_parser.add_argument("--feature-scaling",
+                              action='store_false',
+                              help="Enable feature scaling if applicable",
+                              default=False)
+    train_parser.add_argument("--no-eval",
+                              action='store_true',
+                              help="Evaluate model performance after training",
+                              default=True)
+    train_parser.add_argument("-v", "--verbose", 
+                              action="store_true", 
+                              help="Verbose mode")
+    train_parser.add_argument("--debug", 
+                              action="store_true", 
+                              help="Debug mode")
+    train_parser.set_defaults(func=train_command)
+
+    # Predict commands
+    predict_parser = subparsers.add_parser("predict", 
+                                           help="Predict target",
+                                           formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    # Evaluate commands
+    evaluate_parser = subparsers.add_parser("evaluate", 
+                                            help="Evaluate model",
+                                            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+    args = parser.parse_args()
+
+    if not args.command:
+        parser.print_help()
+
+if __name__ == "__main__":
+    main()

@@ -7,7 +7,7 @@ from sentimentanalysis.pipeline import predict
 from sentimentanalysis.utils import load_config
 from sentimentanalysis.config import (
     SERVICE_NAME,
-    API_VERSION,
+    VERSION,
     DEFAULT_CONFIG_PATH,
     HEALTHY_STATUS
 )
@@ -55,7 +55,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
-router = APIRouter(prefix="/v1")
+router = APIRouter(prefix="/api/v1")
 
 @router.get("/health")
 def health_check():
@@ -68,7 +68,7 @@ def health_check():
     return {
         "status": HEALTHY_STATUS,
         "service": SERVICE_NAME,
-        "version": API_VERSION,
+        "version": VERSION,
     }
 
 

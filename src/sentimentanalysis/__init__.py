@@ -10,7 +10,7 @@ from .config import (
     TrainingConfiguration,
     FilePaths,
     MLFlowTracking,
-    API_VERSION,
+    VERSION,
     SERVICE_NAME,
     AUTHOR_NAME,
     AUTHOR_EMAIL,
@@ -23,7 +23,7 @@ from .models import LogisticRegressionModel, NaiveBayesModel, ModelFactory
 from .pipeline import train, predict, evaluate, SentimentPipeline
 from .utils import load_config, setup_logging
 
-__version__ = API_VERSION
+__version__ = VERSION
 __author__ = AUTHOR_NAME
 __email__ = AUTHOR_EMAIL
 
@@ -48,7 +48,7 @@ __all__ = [
     "TrainingConfiguration",
     "FilePaths",
     "MLFlowTracking",
-    "API_VERSION",
+    "VERSION",
     "SERVICE_NAME",
     "AUTHOR_NAME",
     "AUTHOR_EMAIL",
