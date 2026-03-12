@@ -2,7 +2,14 @@ import argparse
 from sentimentanalysis import __version__, DEFAULT_CONFIG_PATH
 
 def train_command():
-    print("This is a training command with argument ")
+    print("This is a training command")
+
+def predict_command():
+    print("This is a prediction command")
+
+def evaluate_command():
+    print("This is an evaluation command")
+
 
 def main():
     """CLI entry point."""
@@ -67,23 +74,42 @@ For more information, visit: https://github.com/huypq02/sentiment-analysis-proje
                               action='store_true',
                               help="Evaluate model performance after training",
                               default=True)
-    train_parser.add_argument("-v", "--verbose", 
-                              action="store_true", 
-                              help="Verbose mode")
-    train_parser.add_argument("--debug", 
-                              action="store_true", 
-                              help="Debug mode")
+    train_parser.add_argument("-v", "--verbose", action="store_true", help="Verbose mode")
+    train_parser.add_argument("--debug", action="store_true", help="Debug mode")
     train_parser.set_defaults(func=train_command)
 
     # Predict commands
-    predict_parser = subparsers.add_parser("predict", 
-                                           help="Predict target",
-                                           formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    # Evaluate commands
-    evaluate_parser = subparsers.add_parser("evaluate", 
-                                            help="Evaluate model",
-                                            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    predict_parser = subparsers.add_parser(
+        "predict", 
+        help="Predict target",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    predict_parser.add_argument("text", type=str, help="Review text")
+    predict_parser.add_argument("-v", "--verbose", action="store_true", help="Verbose mode")
+    predict_parser.add_argument("--debug", action="store_true", help="Debug mode")
+    predict_parser.set_defaults(func=predict_command)
 
+    # Evaluate commands
+    evaluate_parser = subparsers.add_parser(
+        "evaluate", 
+        help="Evaluate model",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    evaluate_parser.add_argument("--config", 
+                                 help="configuration path", 
+                                 default=DEFAULT_CONFIG_PATH)
+    evaluate_parser.add_argument("--test-size",
+                                 type=float,
+                                 help="Test size for training model",
+                                 default=0.2)
+    evaluate_parser.add_argument("--random-state",
+                                 type=int,
+                                 help="Random state for training model",
+                                 default=0)
+    evaluate_parser.add_argument("-v", "--verbose", action="store_true", help="Verbose mode")
+    evaluate_parser.add_argument("--debug", action="store_true", help="Debug mode")
+    evaluate_parser.set_defaults(func=evaluate_command)
+    
     args = parser.parse_args()
 
     if not args.command:

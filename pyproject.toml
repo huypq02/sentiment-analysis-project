@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sentimentanalysis"
-version = "1.2.0"
+version = "1.2.1"
 description = "A sentiment analysis package for product reviews"
 readme = "README.md"
 authors = [
@@ -52,9 +52,7 @@ Homepage = "https://github.com/huypq02/sentiment-analysis-project"
 Repository = "https://github.com/huypq02/sentiment-analysis-project"
 
 [project.scripts]
-sentiment-train = "sentimentanalysis.pipeline.training:main"
-sentiment-predict = "sentimentanalysis.pipeline.prediction:main"
-sentiment-api = "sentimentanalysis.app.main:main"
+sentimentanalysis = "sentimentanalysis.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
