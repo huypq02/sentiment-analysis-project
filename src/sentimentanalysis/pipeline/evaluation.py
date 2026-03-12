@@ -60,7 +60,14 @@ def evaluate(
     return metrics
 
 
-def evaluate_saved_model(config_path=None, data_path=None, text_column="review", label_column="sentiment"):
+def evaluate_saved_model(
+        config_path=None, 
+        data_path=None,
+        test_size=0.2,
+        random_state=42,
+        text_column="review", 
+        label_column="sentiment"
+):
     """
     Load saved model and evaluate on test data.
     
@@ -105,7 +112,7 @@ def evaluate_saved_model(config_path=None, data_path=None, text_column="review",
     # Use the same test split (or full dataset if specified)
     logger.info("Splitting dataset...")
     _, X_test, _, y_test = train_test_split(
-        texts_cleaned, labels, test_size=0.2, random_state=42
+        texts_cleaned, labels, test_size=test_size, random_state=random_state
     )
     
     # Transform and evaluate
