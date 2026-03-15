@@ -1,8 +1,29 @@
 import argparse
 from sentimentanalysis import __version__, DEFAULT_CONFIG_PATH
+from sentimentanalysis.pipeline import train
+from sentimentanalysis.config import (
+    DataParameters,
+    ComponentSelection,
+    Hyperparameters,
+    TrainingConfiguration,
+    FilePaths,
+)
 
-def train_command():
-    print("This is a training command")
+def train_command(args):
+    train(
+        component_sel=ComponentSelection(
+            extractor_name=args.extractor,
+            model_name=args.model
+        ),
+        hyperparams=Hyperparameters(),
+        training_conf=TrainingConfiguration(
+            test_size=args.test_size,
+            random_state=args.random_state,
+            feature_scaling=args.feature_scaling,
+            evaluate_after_training=not args.no_eval
+        ),
+        file_paths=FilePaths(config_path=args.config),
+    )
 
 def predict_command():
     print("This is a prediction command")
@@ -71,9 +92,9 @@ For more information, visit: https://github.com/huypq02/sentiment-analysis-proje
                               help="Enable feature scaling if applicable",
                               default=False)
     train_parser.add_argument("--no-eval",
-                              action='store_true',
+                              action='store_false',
                               help="Evaluate model performance after training",
-                              default=True)
+                              default=False)
     train_parser.add_argument("-v", "--verbose", action="store_true", help="Verbose mode")
     train_parser.add_argument("--debug", action="store_true", help="Debug mode")
     train_parser.set_defaults(func=train_command)
