@@ -29,8 +29,10 @@ def predict(model, extractor, text: str):
         preprocessor = Preprocessor()
         tokens = preprocessor.preprocess(text)
         text_clean = " ".join(tokens)
+        logger.debug("Preprocessed token count: %d", len(tokens))
         test_data = pd.Series([text_clean])
         transformed_data = extractor.transform(test_data)
+        logger.debug("Transformed feature matrix shape: %s", transformed_data.shape)
 
         # 9. Make a prediction a review text from the customer
         logger.info("Predicting ...")
