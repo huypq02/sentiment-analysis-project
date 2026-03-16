@@ -54,6 +54,8 @@ def train(
         logger.error("Failed to load configuration. Exiting.")
         raise RuntimeError("Failed to load configuration.")
     data_path = os.path.join(config["dataset"]["raw_dir"], config["dataset"]["file"])
+    logger.debug("Using config path: %s", config_path)
+    logger.debug("Resolved training data path: %s", data_path)
 
     try:
         # 2. Load data
@@ -62,6 +64,7 @@ def train(
         loader = DataLoader()
         # Import dataset
         df = loader.load_csv(data_path)
+        logger.debug("Loaded dataset shape: %s", df.shape)
 
         # 3. Preprocessing
         logger.info("Data preprocessing...")
@@ -72,6 +75,7 @@ def train(
         texts_cleaned = df["reviewText_clean"].apply(lambda x: " ".join(x))        
         labels = df[data_params.label_column]
         logger.info(f"Sentiment distribution: {labels.value_counts().to_dict()}")
+        logger.debug("Using text column '%s' and label column '%s'", data_params.text_column, data_params.label_column)
 
         # 4. Split
         logger.info("Splitting dataset...")
@@ -79,6 +83,7 @@ def train(
         X_train, X_test, y_train, y_test = train_test_split(
             texts_cleaned, labels, test_size=training_conf.test_size, random_state=training_conf.random_state
         )
+        logger.debug("Train/Test sizes: %d/%d", len(X_train), len(X_test))
 
         # 5. Set up pipeline for vectorizer and model
         logger.info("Setting up the extractor feature...")
@@ -91,6 +96,8 @@ def train(
             model_name=component_sel.model_name,
             params=hyperparams.model_params
         )
+        logger.debug("Extractor selected: %s", component_sel.extractor_name)
+        logger.debug("Model selected: %s", component_sel.model_name)
 
         if training_conf.feature_scaling:
             pipeline = Pipeline([
@@ -111,6 +118,7 @@ def train(
             cv=5,
             n_jobs=-1
         )
+        logger.debug("Grid search parameter groups: %d", len(hyperparams.param_grid))
 
         grid_search.fit(X_train, y_train)
         logger.info(f"The best hyperparameters: {grid_search.best_params_}")
@@ -121,6 +129,7 @@ def train(
         
         logger.info("Transforming test data...")
         feature_test_transformed = extractor_wrapper.vectorizer.transform(X_test)
+        logger.debug("Transformed test feature shape before scaling: %s", feature_test_transformed.shape)
 
         # Extract scaler if feature scaling was used
         if training_conf.feature_scaling and 'scaler' in best_model.named_steps:
@@ -128,6 +137,7 @@ def train(
             model_wrapper.scaler = best_model.named_steps['scaler']
             # Apply scaler transformations
             feature_test_transformed = model_wrapper.scaler.transform(feature_test_transformed)
+            logger.debug("Transformed test feature shape after scaling: %s", feature_test_transformed.shape)
         else:
             # Explicitly mark scaler as unused so downstream code can skip scaling safely.
             model_wrapper.scaler = None

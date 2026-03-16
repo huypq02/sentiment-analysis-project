@@ -31,6 +31,9 @@ def evaluate(
     try:
         config_path: str = os.environ.get("CONFIG_PATH", DEFAULT_CONFIG_PATH)
         config = load_config(config_path)
+        logger.debug("Using config path for evaluation output: %s", config_path)
+        logger.debug("Evaluation feature shape: %s", getattr(feature_test, "shape", "unknown"))
+        logger.debug("Evaluation label count: %d", len(label_test))
         
         logger.info("Evaluating model...")
         metrics = evaluate_model.evaluate(feature_test, label_test)
@@ -84,6 +87,7 @@ def evaluate_saved_model(
     """
     config_path = config_path or os.environ.get("CONFIG_PATH", DEFAULT_CONFIG_PATH)
     config = load_config(config_path)
+    logger.debug("Using config path: %s", config_path)
     
     # Load saved model and extractor
     model_path = config["models"]["model"]
@@ -101,6 +105,7 @@ def evaluate_saved_model(
     logger.info(f"Loading data from {data_path}...")
     loader = DataLoader()
     df = loader.load_csv(data_path)
+    logger.debug("Loaded evaluation dataset shape: %s", df.shape)
     
     # Preprocessing
     logger.info("Data preprocessing...")
@@ -114,10 +119,12 @@ def evaluate_saved_model(
     _, X_test, _, y_test = train_test_split(
         texts_cleaned, labels, test_size=test_size, random_state=random_state
     )
+    logger.debug("Evaluation split size: %d", len(X_test))
     
     # Transform and evaluate
     logger.info("Transforming test data...")
     feature_test = extractor.transform(X_test)
+    logger.debug("Transformed evaluation feature shape: %s", feature_test.shape)
 
     # Apply scaler only if it exists and was fitted during training.
     scaler = getattr(model, "scaler", None)
