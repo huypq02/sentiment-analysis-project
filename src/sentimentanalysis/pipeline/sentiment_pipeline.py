@@ -43,6 +43,42 @@ class SentimentPipeline:
         :type y_train: array-like
         """
         self.model.train(X_train, y_train)
+
+    def preprocess_texts(self, texts):
+        """
+        Preprocess raw texts into cleaned strings.
+
+        :param texts: Input text or texts
+        :type texts: str | array-like
+        :return: Cleaned texts ready for feature extraction
+        :rtype: list[str]
+        """
+        if isinstance(texts, str):
+            texts = [texts]
+
+        cleaned_texts = []
+        for text in texts:
+            tokens = self.preprocessor.preprocess(text)
+            cleaned_texts.append(" ".join(tokens))
+
+        return cleaned_texts
+
+    def transform(self, texts):
+        """
+        Transform raw texts into model-ready features.
+
+        :param texts: Input text or texts
+        :type texts: str | array-like
+        :return: Transformed features
+        :rtype: array-like
+        """
+        cleaned_texts = self.preprocess_texts(texts)
+        features = self.extractor.transform(cleaned_texts)
+
+        if getattr(self.model, "scaler", None) is not None:
+            features = self.model.scaler.transform(features)
+
+        return features
     
     def predict(self, texts):
         """
@@ -53,18 +89,23 @@ class SentimentPipeline:
         :return: Prediction result
         :rtype: int
         """
-        predictions = self.model.predict(texts)
-        return predictions[0]
+        features = self.transform(texts)
+        predictions = self.model.predict(features)
 
-    def evaluate(self, y_pred, y_test):
+        if isinstance(texts, str):
+            return predictions[0]
+
+        return predictions
+
+    def evaluate(self, feature_test, label_test):
         """
         Evaluate a model.
         
-        :param y_pred: Predicted labels
-        :type y_pred: array-like
-        :param y_test: True labels
-        :type y_test: array-like
+        :param feature_test: Features
+        :type feature_test: array-like
+        :param label_test: True labels
+        :type label_test: array-like
         :return: Evaluation metrics
         :rtype: dict
         """
-        return self.model.evaluate(y_pred, y_test)
+        return self.model.evaluate(feature_test, label_test)
