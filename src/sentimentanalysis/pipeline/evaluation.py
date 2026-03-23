@@ -28,6 +28,9 @@ def evaluate(
     try:
         config_path: str = os.environ.get("CONFIG_PATH", DEFAULT_CONFIG_PATH)
         config = load_config(config_path)
+        logger.debug("Using config path for evaluation output: %s", config_path)
+        logger.debug("Evaluation feature shape: %s", getattr(feature_test, "shape", "unknown"))
+        logger.debug("Evaluation label count: %d", len(label_test))
         
         logger.info("Evaluating model...")
         metrics = pipeline.evaluate(feature_test, label_test)
@@ -81,6 +84,7 @@ def evaluate_saved_model(
     """
     config_path = config_path or os.environ.get("CONFIG_PATH", DEFAULT_CONFIG_PATH)
     config = load_config(config_path)
+    logger.debug("Using config path: %s", config_path)
     
     # Load saved model and extractor
     model_path = config["models"]["model"]

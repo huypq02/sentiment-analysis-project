@@ -2,7 +2,6 @@ import os
 import joblib
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sentimentanalysis.data import DataLoader, Preprocessor
 from sentimentanalysis.features import ExtractorFactory
 from sentimentanalysis.models import ModelFactory
 from sentimentanalysis.utils import load_config, setup_logging
@@ -55,6 +54,8 @@ def train(
         logger.error("Failed to load configuration. Exiting.")
         raise RuntimeError("Failed to load configuration.")
     data_path = os.path.join(config["dataset"]["raw_dir"], config["dataset"]["file"])
+    logger.debug("Using config path: %s", config_path)
+    logger.debug("Resolved training data path: %s", data_path)
 
     sentiment_pipeline = SentimentPipeline()
 
@@ -69,12 +70,14 @@ def train(
             df, data_params.text_column, data_params.label_column
         )
         logger.info(f"Sentiment distribution: {labels.value_counts().to_dict()}")
+        logger.debug("Using text column '%s' and label column '%s'", data_params.text_column, data_params.label_column)
 
         # 4. Split
         logger.info("Splitting dataset...")
         X_train, X_test, y_train, y_test = sentiment_pipeline.split_data(
             texts_cleaned, labels, training_conf.test_size, training_conf.random_state
         )
+        logger.debug("Train/Test sizes: %d/%d", len(X_train), len(X_test))
 
         # 5. Set up extractor and model
         logger.info("Setting up the extractor feature...")
@@ -87,6 +90,8 @@ def train(
             model_name=component_sel.model_name,
             params=hyperparams.model_params
         )
+        logger.debug("Extractor selected: %s", component_sel.extractor_name)
+        logger.debug("Model selected: %s", component_sel.model_name)
 
         if training_conf.feature_scaling:
             sklearn_pipeline = Pipeline([
@@ -107,6 +112,7 @@ def train(
             cv=5,
             n_jobs=-1
         )
+        logger.debug("Grid search parameter groups: %d", len(hyperparams.param_grid))
 
         grid_search.fit(X_train, y_train)
         logger.info(f"The best hyperparameters: {grid_search.best_params_}")
