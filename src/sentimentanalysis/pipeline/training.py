@@ -15,6 +15,7 @@ from sentimentanalysis.config import (
     MLFlowTracking
 )
 from .evaluation import evaluate
+from .sentiment_pipeline import SentimentPipeline
 
 logger = setup_logging(__name__)
 
@@ -55,32 +56,27 @@ def train(
         raise RuntimeError("Failed to load configuration.")
     data_path = os.path.join(config["dataset"]["raw_dir"], config["dataset"]["file"])
 
+    sentiment_pipeline = SentimentPipeline()
+
     try:
         # 2. Load data
         logger.info("Loading data...")
-        # Define a DataLoader's object
-        loader = DataLoader()
-        # Import dataset
-        df = loader.load_csv(data_path)
+        df = sentiment_pipeline.load_dataset(data_path)
 
         # 3. Preprocessing
         logger.info("Data preprocessing...")
-        # Preprocess data
-        preprocessor = Preprocessor()
-        df["reviewText_clean"] = df[data_params.text_column].apply(preprocessor.preprocess)
-        # Convert df['reviewText_clean'] from tokens to string X
-        texts_cleaned = df["reviewText_clean"].apply(lambda x: " ".join(x))        
-        labels = df[data_params.label_column]
+        texts_cleaned, labels = sentiment_pipeline.extract_texts_and_labels(
+            df, data_params.text_column, data_params.label_column
+        )
         logger.info(f"Sentiment distribution: {labels.value_counts().to_dict()}")
 
         # 4. Split
         logger.info("Splitting dataset...")
-        # Split dataset into training set and test set
-        X_train, X_test, y_train, y_test = train_test_split(
-            texts_cleaned, labels, test_size=training_conf.test_size, random_state=training_conf.random_state
+        X_train, X_test, y_train, y_test = sentiment_pipeline.split_data(
+            texts_cleaned, labels, training_conf.test_size, training_conf.random_state
         )
 
-        # 5. Set up pipeline for vectorizer and model
+        # 5. Set up extractor and model
         logger.info("Setting up the extractor feature...")
         extractor_wrapper = ExtractorFactory.create_extractor(
             extractor_name=component_sel.extractor_name,
@@ -93,21 +89,21 @@ def train(
         )
 
         if training_conf.feature_scaling:
-            pipeline = Pipeline([
+            sklearn_pipeline = Pipeline([
                 ("extractor", extractor_wrapper.vectorizer),
                 ("scaler", model_wrapper.scaler),
                 ("model", model_wrapper.classifier)
             ], memory=None)  # Optional: Feature scaling
         else:
-            pipeline = Pipeline([
+            sklearn_pipeline = Pipeline([
                 ("extractor", extractor_wrapper.vectorizer),
                 ("model", model_wrapper.classifier)
             ], memory=None)
 
-        # 6. Training pipeline strategy with hyperparmeter fine-tuning
+        # 6. Training with hyperparameter fine-tuning
         grid_search = GridSearchCV(
-            estimator=pipeline,
-            param_grid= hyperparams.param_grid,
+            estimator=sklearn_pipeline,
+            param_grid=hyperparams.param_grid,
             cv=5,
             n_jobs=-1
         )
@@ -118,19 +114,20 @@ def train(
         best_model = grid_search.best_estimator_
         model_wrapper.classifier = best_model.named_steps['model']
         extractor_wrapper.vectorizer = best_model.named_steps['extractor']
-        
-        logger.info("Transforming test data...")
-        feature_test_transformed = extractor_wrapper.vectorizer.transform(X_test)
 
         # Extract scaler if feature scaling was used
         if training_conf.feature_scaling and 'scaler' in best_model.named_steps:
-            logger.info("Applying feature scaling...")
             model_wrapper.scaler = best_model.named_steps['scaler']
-            # Apply scaler transformations
-            feature_test_transformed = model_wrapper.scaler.transform(feature_test_transformed)
         else:
             # Explicitly mark scaler as unused so downstream code can skip scaling safely.
             model_wrapper.scaler = None
+
+        # Update sentiment pipeline with trained wrappers
+        sentiment_pipeline.set_extractor(extractor_wrapper)
+        sentiment_pipeline.set_model(model_wrapper)
+
+        # Transform test features through sentiment pipeline
+        feature_test_transformed = sentiment_pipeline.transform(X_test)
 
     except Exception as e:
         logger.exception(f"Unexpected error in training pipeline: {e}")
@@ -139,7 +136,7 @@ def train(
     # 7. Evaluate model on test set
     if training_conf.evaluate_after_training:
         logger.info("Evaluating model on test set...")
-        evaluate(model_wrapper, feature_test_transformed, y_test)
+        evaluate(sentiment_pipeline, feature_test_transformed, y_test)
 
     # 8. Save model and feature extractor
     # Create new folder with the name 'models' if it doesn't exist

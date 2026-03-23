@@ -1,8 +1,14 @@
-from sentimentanalysis.data import Preprocessor
+from sklearn.exceptions import NotFittedError
+from sklearn.model_selection import train_test_split
+from sklearn.utils.validation import check_is_fitted
+from sentimentanalysis.data import DataLoader, Preprocessor
+from sentimentanalysis.utils import setup_logging
 
+
+logger = setup_logging(__name__)
 
 class SentimentPipeline:
-    def __init__(self, extractor_strategy, model_strategy):
+    def __init__(self, extractor_strategy=None, model_strategy=None):
         """
         Initialize classifier with feature extractor and model.
         
@@ -72,24 +78,86 @@ class SentimentPipeline:
         :return: Transformed features
         :rtype: array-like
         """
-        cleaned_texts = self.preprocess_texts(texts)
-        features = self.extractor.transform(cleaned_texts)
+        logger.info("Transforming test data...")
+        features = self.extractor.transform(texts)
 
-        if getattr(self.model, "scaler", None) is not None:
-            features = self.model.scaler.transform(features)
+        scaler = getattr(self.model, "scaler", None)
+        if scaler is not None:
+            try:
+                check_is_fitted(scaler)
+                logger.info("Applying feature scaling...")
+                features = self.model.scaler.transform(features)
+            except NotFittedError:
+                logger.info("Skipping feature scaling: scaler exists but is not fitted.")
 
         return features
+
+    def load_dataset(self, data_path):
+        """
+        Load a CSV file into a dataset.
+
+        :param data_path: Path to CSV data
+        :type data_path: str
+        :return: Loaded dataset
+        :rtype: pandas.DataFrame
+        """
+        logger.info("Loading data from %s...", data_path)
+        loader = DataLoader()
+        return loader.load_csv(data_path)
+
+    def extract_texts_and_labels(self, df, text_column, label_column):
+        """
+        Extract cleaned texts and labels from a dataframe.
+
+        :param df: Input dataframe
+        :type df: pandas.DataFrame
+        :param text_column: Name of the text column
+        :type text_column: str
+        :param label_column: Name of the label column
+        :type label_column: str
+        :return: Tuple of cleaned texts and labels
+        :rtype: tuple
+        """
+        logger.info("Data preprocessing...")
+        texts_cleaned = self.preprocess_texts(df[text_column])
+        labels = df[label_column]
+        return texts_cleaned, labels
+
+    def split_data(self, texts_cleaned, labels, test_size=0.2, random_state=42):
+        """
+        Split cleaned texts and labels to get test data.
+
+        :param texts_cleaned: Cleaned texts
+        :type texts_cleaned: array-like
+        :param labels: Labels
+        :type labels: array-like
+        :param test_size: Fraction for test split
+        :type test_size: float
+        :param random_state: Random seed for split reproducibility
+        :type random_state: int
+        :return: Tuple of test texts and test labels
+        :rtype: tuple
+        """
+        logger.info("Splitting dataset...")
+        X_train, X_test, y_train, y_test = train_test_split(
+            texts_cleaned,
+            labels,
+            test_size=test_size,
+            random_state=random_state,
+        )
+        return X_train, X_test, y_train, y_test
     
     def predict(self, texts):
         """
         Predict sentiment for texts.
         
         :param texts: Input texts to predict
-        :type texts: array-like
+        :type texts: str | array-like
         :return: Prediction result
-        :rtype: int
+        :rtype: int | array-like
         """
-        features = self.transform(texts)
+        cleaned = self.preprocess_texts(texts)
+        features = self.transform(cleaned)
         predictions = self.model.predict(features)
 
         if isinstance(texts, str):

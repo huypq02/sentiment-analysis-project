@@ -1,9 +1,6 @@
 import os
 import joblib
-from sklearn.exceptions import NotFittedError
-from sklearn.model_selection import train_test_split
-from sklearn.utils.validation import check_is_fitted
-from sentimentanalysis.data import DataLoader, Preprocessor
+from .sentiment_pipeline import SentimentPipeline
 from sentimentanalysis.utils import load_config, setup_logging
 from sentimentanalysis.config import DEFAULT_CONFIG_PATH
 
@@ -11,15 +8,15 @@ logger = setup_logging(__name__)
 
 
 def evaluate(
-        evaluate_model, 
+        pipeline, 
         feature_test, 
         label_test
 ):
     """
     Evaluate model performance (accuracy, f1, confusion matrix...).
 
-    :param evaluate_model: Trained model object with an evaluate method
-    :type evaluate_model: SentimentModel
+    :param pipeline: Sentiment pipeline containing the trained model
+    :type pipeline: SentimentPipeline
     :param feature_test: Test feature matrix (vectorized/scaled)
     :type feature_test: array-like
     :param label_test: True labels for the test set
@@ -33,7 +30,7 @@ def evaluate(
         config = load_config(config_path)
         
         logger.info("Evaluating model...")
-        metrics = evaluate_model.evaluate(feature_test, label_test)
+        metrics = pipeline.evaluate(feature_test, label_test)
 
         # Save results
         os.makedirs(config["models"]["dir"], exist_ok=True)
@@ -95,38 +92,28 @@ def evaluate_saved_model(
     logger.info("Loading saved model and extractor...")
     model = joblib.load(model_path)
     extractor = joblib.load(extractor_path)
-    
-    # Load and preprocess data
-    data_path = data_path or os.path.join(config["dataset"]["raw_dir"], config["dataset"]["file"])
-    logger.info(f"Loading data from {data_path}...")
-    loader = DataLoader()
-    df = loader.load_csv(data_path)
-    
-    # Preprocessing
-    logger.info("Data preprocessing...")
-    preprocessor = Preprocessor()
-    df["reviewText_clean"] = df[text_column].apply(preprocessor.preprocess)
-    texts_cleaned = df["reviewText_clean"].apply(lambda x: " ".join(x))
-    labels = df[label_column]
-    
-    # Use the same test split (or full dataset if specified)
-    logger.info("Splitting dataset...")
-    _, X_test, _, y_test = train_test_split(
-        texts_cleaned, labels, test_size=test_size, random_state=random_state
-    )
-    
-    # Transform and evaluate
-    logger.info("Transforming test data...")
-    feature_test = extractor.transform(X_test)
+    pipeline = SentimentPipeline(extractor, model)
 
-    # Apply scaler only if it exists and was fitted during training.
-    scaler = getattr(model, "scaler", None)
-    if scaler is not None:
-        try:
-            check_is_fitted(scaler)
-            logger.info("Applying feature scaling...")
-            feature_test = scaler.transform(feature_test)
-        except NotFittedError:
-            logger.info("Skipping feature scaling: scaler exists but is not fitted.")
-    
-    return evaluate(model, feature_test, y_test)
+    # Load data
+    data_path = data_path or os.path.join(config["dataset"]["raw_dir"], config["dataset"]["file"])
+    df = pipeline.load_dataset(data_path)
+
+    # Preprocess texts and extract labels
+    texts_cleaned, labels = pipeline.extract_texts_and_labels(
+        df=df,
+        text_column=text_column,
+        label_column=label_column,
+    )
+
+    # Split test set
+    _, X_test, _, y_test = pipeline.split_data(
+        texts_cleaned=texts_cleaned,
+        labels=labels,
+        test_size=test_size,
+        random_state=random_state,
+    )
+
+    # Transform features
+    feature_test = pipeline.transform(X_test)
+
+    return evaluate(pipeline, feature_test, y_test)
