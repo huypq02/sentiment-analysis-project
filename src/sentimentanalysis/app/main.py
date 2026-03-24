@@ -3,7 +3,7 @@ from fastapi import FastAPI, APIRouter, HTTPException
 import uvicorn
 import os
 import joblib
-from sentimentanalysis.pipeline import predict
+from sentimentanalysis.pipeline import predict, SentimentPipeline
 from sentimentanalysis.utils import load_config
 from sentimentanalysis.config import (
     SERVICE_NAME,
@@ -13,8 +13,7 @@ from sentimentanalysis.config import (
 )
 from .schemas import ReviewRequest, ReviewResponse
 
-model = None
-extractor = None
+pipeline = None
 config = None
 
 def load_artifact():
@@ -26,7 +25,7 @@ def load_artifact():
     :rtype: None
     :raises FileNotFoundError: If trained models are not found
     """
-    global model, extractor, config
+    global pipeline, config
 
     config_path = os.environ.get("CONFIG_PATH", DEFAULT_CONFIG_PATH) 
     config = load_config(config_path)
@@ -40,6 +39,7 @@ def load_artifact():
     
     model = joblib.load(model_path)
     extractor = joblib.load(extractor_path)
+    pipeline = SentimentPipeline(extractor, model)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -88,9 +88,8 @@ async def prediction(request: ReviewRequest):
         raise HTTPException(status_code=400, detail="The text should not be empty or none.")
 
     sentiment = predict(
-        model=model,
-        extractor=extractor,
-        text=text
+        pipeline=pipeline,
+        feature=text
     )
 
     return ReviewResponse(text=text, sentiment=sentiment)
