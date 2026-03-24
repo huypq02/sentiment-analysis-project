@@ -103,6 +103,9 @@ def evaluate_saved_model(
     df = pipeline.load_dataset(data_path)
 
     # Preprocess texts and extract labels
+    text_column = text_column or config["data"]["text_column"]
+    label_column = label_column or config["data"]["label_column"]
+    
     texts_cleaned, labels = pipeline.extract_texts_and_labels(
         df=df,
         text_column=text_column,

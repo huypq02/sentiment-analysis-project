@@ -3,7 +3,7 @@ import os
 import joblib
 import logging
 from sentimentanalysis import __version__, DEFAULT_CONFIG_PATH
-from sentimentanalysis.pipeline import train, predict, evaluate_saved_model
+from sentimentanalysis.pipeline import train, predict, evaluate_saved_model, SentimentPipeline
 from sentimentanalysis.config import (
     DataParameters,
     ComponentSelection,
@@ -31,33 +31,26 @@ def _configure_command_logging(args, logger_names):
 def train_command(args):
     _configure_command_logging(args, [__name__, "sentimentanalysis.pipeline.training", "sentimentanalysis.pipeline.evaluation"])
     
+    config_path = os.environ.get("CONFIG_PATH", args.config)
+    config = load_config(config_path)
+    
     train(
         data_params=DataParameters(
-            data_path=args.data_path
+            data_path=args.data_path or config["data"]["data_path"]
         ),
         component_sel=ComponentSelection(
-            extractor_name=args.extractor,
-            model_name=args.model
+            extractor_name=args.extractor or config["components"]["extractor_name"],
+            model_name=args.model or config["components"]["model_name"]
         ),
         hyperparams=Hyperparameters(
-            param_grid = {
-                "extractor__max_features": [5000, 10000],
-                "extractor__ngram_range": [(1,1), (1,2)],
-                "extractor__min_df": [2, 5],
-                "extractor__max_df": [0.8],
-                "extractor__binary": [False],  # important
-
-                "model__solver": ["lbfgs"],
-                "model__penalty": ["l2"],
-                "model__C": [0.1, 1, 5],
-                "model__class_weight": [None, "balanced"],
-                "model__max_iter": [1000]
-            }
+            extractor_params=config["hyperparameters"].get("extractor_params"),
+            model_params=config["hyperparameters"].get("model_params"),
+            param_grid=config["hyperparameters"].get("param_grid")
         ),
         training_conf=TrainingConfiguration(
-            test_size=args.test_size,
-            random_state=args.random_state,
-            feature_scaling=args.feature_scaling,
+            test_size=args.test_size or config["training"]["test_size"],
+            random_state=args.random_state or config["training"]["random_state"],
+            feature_scaling=args.feature_scaling or config["training"]["feature_scaling"],
             evaluate_after_training=not args.no_eval
         ),
         file_paths=FilePaths(config_path=args.config),
@@ -76,10 +69,11 @@ def predict_command(args):
         model = joblib.load(config["models"]["model"])
         extractor = joblib.load(config["models"]["extractor"])
 
+    pipeline = SentimentPipeline(extractor, model)
+
     predict(
-        model=model,
-        extractor=extractor,
-        text=args.text
+        pipeline=pipeline,
+        feature=args.text
     )
 
 def evaluate_command(args):
@@ -89,7 +83,9 @@ def evaluate_command(args):
         config_path=args.config, 
         data_path=args.data_path,
         test_size=args.test_size,
-        random_state=args.random_state
+        random_state=args.random_state,
+        text_column=args.text_column,
+        label_column=args.label_column
     )
 
 
@@ -154,15 +150,17 @@ For more information, visit: https://github.com/huypq02/sentiment-analysis-proje
                               help="Random state for training model",
                               default=0)
     train_parser.add_argument("--feature-scaling",
-                              action='store_false',
+                              action='store_true',
                               help="Enable feature scaling if applicable",
                               default=False)
     train_parser.add_argument("--no-eval",
-                              action='store_false',
-                              help="Evaluate model performance after training",
+                              action='store_true',
+                              help="Skip evaluation after training",
                               default=False)
     train_parser.add_argument("-v", "--verbose", action="store_true", help="Verbose mode")
     train_parser.add_argument("--debug", action="store_true", help="Debug mode")
+    train_parser.add_argument("--text-column", type=str, help="Name of text column in dataset", default=None)
+    train_parser.add_argument("--label-column", type=str, help="Name of label column in dataset", default=None)
     train_parser.set_defaults(func=train_command)
 
     # Predict commands
@@ -197,6 +195,8 @@ For more information, visit: https://github.com/huypq02/sentiment-analysis-proje
                                  type=int,
                                  help="Random state for training model",
                                  default=0)
+    evaluate_parser.add_argument("--text-column", type=str, help="Name of text column in dataset", default=None)
+    evaluate_parser.add_argument("--label-column", type=str, help="Name of label column in dataset", default=None)
     evaluate_parser.add_argument("-v", "--verbose", action="store_true", help="Verbose mode")
     evaluate_parser.add_argument("--debug", action="store_true", help="Debug mode")
     evaluate_parser.set_defaults(func=evaluate_command)

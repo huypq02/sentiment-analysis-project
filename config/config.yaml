@@ -1,6 +1,67 @@
+# Data Parameters Configuration
+data:
+  data_path: "data/raw/movie_reviews_imdb.csv"
+  text_column: "review"
+  label_column: "sentiment"
+
+# Component Selection
+components:
+  extractor_name: "tfidf" # Options: 'tfidf', 'bow'
+  model_name: "logreg" # Options: 'logreg', 'naive_bayes'
+
+# Hyperparameters
+hyperparameters:
+  extractor_params:
+    max_features: 5000
+    ngram_range: [1, 2]
+    min_df: 2
+    max_df: 0.95
+
+  model_params:
+    C: 1.0
+    max_iter: 1000
+    solver: "lbfgs"
+
+  param_grid:
+    extractor__max_features: [5000, 10000]
+    extractor__ngram_range: [[1, 1], [1, 2]]
+    extractor__min_df: [2, 5]
+    extractor__max_df: [0.8]
+    extractor__binary: [false]
+    model__solver: ["lbfgs"]
+    model__penalty: ["l2"]
+    model__C: [0.1, 1, 5]
+    model__class_weight: [null, "balanced"]
+    model__max_iter: [1000]
+
+# Training Configuration
+training:
+  test_size: 0.2
+  random_state: 0
+  feature_scaling: false
+  evaluate_after_training: true
+
+# File Paths Configuration
+file_paths:
+  config_path: "config/config.yaml"
+  save_dir: "models"
+
+# MLflow Tracking Configuration
+mlflow:
+  mlflow_tracking: true
+  experiment_name: "sentiment-analysis"
+  run_name: null
+  tags:
+    project: "sentiment-analysis"
+    version: "1.0"
+    environment: "development"
+
+# Dataset Configuration
 dataset:
   raw_dir: "data/raw"
   file: "movie_reviews_imdb.csv"
+
+# Models Configuration
 models:
   dir: "models"
   model: "models/sentiment_logreg.pkl"
